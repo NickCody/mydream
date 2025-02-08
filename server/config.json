@@ -1,0 +1,194 @@
+{
+    "sdxl-refiner": {
+        "model_name": "stabilityai/stable-diffusion-xl-refiner-1.0",
+        "pipeline_class": "StableDiffusionXLImg2ImgPipeline",
+        "parameters": {
+            "strength": 0.4,
+            "num_inference_steps": 35,
+            "guidance_scale": 10,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "scheduler": {
+            "type": "EulerAncestralDiscreteScheduler"
+        },
+        "torch_dtype": "float16",
+        "variant": "fp16",
+        "lora.3": {
+            "model_path": "/Volumes/Dragan/HuggingFace/civitai/sdxl1.0_realastic_female_lora.safetensors",
+            "alpha": 0.5
+        },
+        "lora.2": {
+            "model_path": "/Volumes/Dragan/HuggingFace/civitai/Zendaya.safetensors",
+            "alpha": 1.4
+        },
+        "lora.1": {
+            "model_path": "strangerzonehf/Flux-Super-Realism-LoRA/super-realism.safetensors",
+            "alpha": 0.8
+        },
+        "seed.1": 1234589,
+        "codeformer": {
+            "enabled": true,
+            "weight": 0.7,
+            "upscale": 1,
+            "has_aligned": false,
+            "paste_back": true 
+        }
+    },
+    "sdxl": {
+        "model_name": "stabilityai/stable-diffusion-xl-base-1.0",
+        "pipeline_class": "StableDiffusionXLImg2ImgPipeline",
+        "parameters": {
+            "strength": 0.3,
+            "num_inference_steps": 20,
+            "guidance_scale": 7.0,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "scheduler": null,
+        "torch_dtype": "float16",
+        "variant": "fp16"
+    },
+    "sd2-inpaint": {
+        "model_name": "stabilityai/stable-diffusion-2-inpainting",
+        "pipeline_class": "StableDiffusionInpaintPipeline",
+        "parameters": {
+            "strength": 0.33,
+            "num_inference_steps": 20,
+            "guidance_scale": 7.5,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "torch_dtype": "float16",
+        "variant": "fp16"
+    },
+    "sd21-inpaint": {
+        "model_name": "HieuPM/stable-diffusion-2-1-inpainting",
+        "pipeline_class": "StableDiffusionInpaintPipeline",
+        "parameters": {
+            "strength": 0.33,
+            "num_inference_steps": 20,
+            "guidance_scale": 7.5,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "torch_dtype": "float32",
+        "variant": "fp32"
+    },
+    "sd21": {
+        "comment": "This model is producing black frames",
+        "model_name": "stabilityai/stable-diffusion-2-1",
+        "pipeline_class": "AutoPipelineForImage2Image",
+        "parameters": {
+            "strength": 0.33,
+            "num_inference_steps": 20,
+            "guidance_scale": 7.5,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "torch_dtype": "float16"
+    },
+    "sd15": {
+        "model_name": "runwayml/stable-diffusion-v1-5",
+        "pipeline_class": "StableDiffusionImg2ImgPipeline",
+        "parameters": {
+            "strength": 0.2,
+            "num_inference_steps": 20,
+            "guidance_scale": 7.5,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "scheduler": {
+            "type": "EulerAncestralDiscreteScheduler"
+        },
+        "torch_dtype": "float32"
+    },
+    "realistic-vision-v5.1": {
+        "model_name": "SG161222/Realistic_Vision_V5.1",
+        "pipeline_class": "StableDiffusionImg2ImgPipeline",
+        "parameters": {
+            "strength": 0.5,
+            "num_inference_steps": 20,
+            "guidance_scale": 9.0,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "scheduler": {
+            "type": "DPM++ 2M Karras",
+            "use_karras_sigmas": true
+        },
+        "torch_dtype": "float32",
+        "variant": "fp32"
+    },
+    "redshift-diffusion": {
+        "model_name": "nitrosocke/redshift-diffusion",
+        "pipeline_class": "StableDiffusionImg2ImgPipeline",
+        "parameters": {
+            "strength": 0.4,
+            "num_inference_steps": 20,
+            "guidance_scale": 8.5,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed"
+        },
+        "scheduler": null,
+        "torch_dtype": "float32",
+        "variant": "fp32"
+    },
+    "openjourney-v4": {
+        "model_name": "prompthero/openjourney-v4",
+        "pipeline_class": "StableDiffusionImg2ImgPipeline",
+        "parameters": {
+            "strength": 0.6,
+            "num_inference_steps": 20,
+            "guidance_scale": 5.0,
+            "width": 640,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "scheduler": null,
+        "torch_dtype": "float32",
+        "variant": "fp32"
+    },
+    "stable-diffusion-3-5-medium": {
+        "model_name": "stabilityai/stable-diffusion-3-medium",
+        "pipeline_class": "AltDiffusionImg2ImgPipeline",
+        "parameters": {
+            "strength": 0.5,
+            "num_steps": 50,
+            "guidance_scale": 5.0,
+            "width": 512,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "scheduler": {
+            "type": "DPM++ 3M SDE",
+            "use_karras_sigmas": true,
+            "euler_at_final": true
+        },
+        "torch_dtype": "float32",
+        "variant": "fp32"
+    },
+    "stable-diffusion-3-5-large": {
+        "model_name": "stabilityai/stable-diffusion-3.5-large-turbo",
+        "pipeline_class": "StableDiffusion3Img2ImgPipeline",
+        "parameters": {
+            "strength": 0.5,
+            "num_steps": 50,
+            "guidance_scale": 5.0,
+            "width": 512,
+            "height": 512,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, text artifacts, distorted faces, grainy, low detail, overexposed, low poly, bad anatomy, unrealistic shading"
+        },
+        "scheduler": null,
+        "torch_dtype": "float32",
+        "variant": "fp32"
+    }
+}

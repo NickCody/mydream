@@ -1,0 +1,77 @@
+# RUMPLE "MY DREAM"
+
+NOTE: This README is a work in progress.
+
+## INSTALL PREREQUISITES
+
+Most of these instructions are for the MacOS on Apple Silicon. Windows instructions will be added later.
+
+Some preliminary installations, you'll need Homebrew, python3, and portaudio.
+
+```bash
+brew install pyenv
+pyenv global 3.12.0
+brew install python3.12 # 10 and 11 are probably ok
+brew install portaudio
+brew install cmake
+python3 -m pip install jax-metal
+```
+
+### CodeFormer
+
+```bash
+git clone git@github.com:sczhou/CodeFormer.git
+```
+
+### SPEECH RECOGNITION SETUP
+
+Download model to client/audio/models:
+
+- <https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip>
+- <https://alphacephei.com/vosk/models>
+
+## Run
+
+You need to run the client and the server in two separate terminals. Before running each, you need to install the dependencies:
+
+```bash
+scripts/init-venv.sh
+```
+
+Then activate the `venv`::
+
+```bash
+source scripts/activate-venv.sh
+```
+
+Then you can run both of these, except in separate terminals:
+
+```bash
+scripts/client.sh
+scripts/server.sh [model-name] # optpional model name
+```
+
+Typical config looks like this:
+
+```json
+    "xl": {
+        "model_name": "stabilityai/stable-diffusion-xl-refiner-1.0",
+        "pipeline_class": "AutoPipelineForImage2Image",
+        "parameters": {
+            "strength": 0.33,                   # 0 incoming image is strong, 1 weak
+            "num_inference_steps": 20,          # Lower for speed, higher for quality          
+            "guidance_scale": 12.0,             # How strongly to follow prompt
+            "width": 640,                       
+            "height": 512,
+            "negative_prompt": "painting, anime, illustration"
+        },
+        "scheduler": {
+            "type": "EulerAncestralDiscreteScheduler"
+        }
+    }
+```
+
+## NOTES
+
+- Configs for server-side image generation models are in `server/config.json`
+- Default prompt is in `client/gui/main_w.py`, lame but will fix later

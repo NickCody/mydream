@@ -1,0 +1,54 @@
+# Server Requirements
+accelerate
+diffusers
+fastapi
+huggingface_hub
+keras
+keras_cv
+pillow
+protobuf
+python-multipart
+sentencepiece
+tensorflow
+tensorflow-metal; platform_system == "Darwin"  # For macOS
+torch
+transformers
+uvicorn
+tensorflow_datasets
+
+# Audio processing
+PyAudio==0.2.11             # For capturing audio from the microphone
+vosk==0.3.43                # For offline speech recognition
+
+# Image and video processing
+opencv-python               # For video capture and image processing
+mediapipe
+torchvision
+Pillow
+
+# GUI
+PyQt5                       # For building the native GUI interface
+
+# Networking & Utilities
+requests                    # For sending HTTP requests to the server
+numpy
+
+# Codeformer requirements
+addict
+future
+lmdb
+numpy
+opencv-python
+Pillow
+pyyaml
+requests
+scikit-image
+scipy
+tb-nightly
+torch>=1.7.1
+torchvision
+tqdm
+yapf
+lpips
+gdown # supports dVwnloading the large file from Google Drive
+basicsr 

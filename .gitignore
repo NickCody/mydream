@@ -1,0 +1,14 @@
+.venv
+.DS_Store
+._.DS_Store
+client/audio/models/
+.pyc
+__pycache__/
+*.png
+*.PNG
+*.jpg
+*.jpeg
+*.safetensors
+models/
+CodeFormer/
+weights/
