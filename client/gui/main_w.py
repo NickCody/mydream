@@ -7,8 +7,13 @@ from gui.image_display_widget import ImageDisplayWidget
 from gui.image_sender import ImageSender
 from audio.audio_worker import AudioWorker
 
+# DEFAULT_PROMPT = r"""
+# Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in toga
+# greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp
+# """
+
 DEFAULT_PROMPT = r"""
-Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in toga
+Young (handsome) [pedro pascal|antonio banderas], dressed in toga
 greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp
 """
 

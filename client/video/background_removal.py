@@ -16,26 +16,37 @@ class BackgroundSubtraction:
         return result
 
 class GrabCutSegmentation:
-    def process(self, image):
-        mask = np.zeros(image.shape[:2], np.uint8)
+    def process(self, image, iterations=3):
+        """
+        Performs GrabCut segmentation to extract the foreground.
+
+        Parameters:
+        - image (numpy.ndarray): Input image.
+        - iterations (int): Number of GrabCut iterations (lower = faster, higher = better quality).
+
+        Returns:
+        - numpy.ndarray: The segmented image.
+        """
+
+        height, width = image.shape[:2]
+
+        # Initialize mask & models
+        mask = np.zeros((height, width), np.uint8)
         bgdModel = np.zeros((1, 65), np.float64)
         fgdModel = np.zeros((1, 65), np.float64)
-        rect = (50, 50, image.shape[1] - 100, image.shape[0] - 100)
 
-        # Convert image to UMat for OpenCL acceleration
-        u_image = cv2.UMat(image)
+        # Define bounding rectangle (shrink a bit to avoid edge artifacts)
+        rect = (10, 10, width - 20, height - 20)
 
-        # Convert back to NumPy before passing to grabCut
-        image_np = cv2.UMat.get(u_image)
+        # ✅ Run GrabCut (optimized iteration count)
+        cv2.grabCut(image, mask, rect, bgdModel, fgdModel, iterations, cv2.GC_INIT_WITH_RECT)
 
-        # Perform GrabCut segmentation
-        cv2.grabCut(image_np, mask, rect, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_RECT)
+        # ✅ Convert mask to binary (faster approach)
+        mask_bin = (mask == 1) | (mask == 3)
 
-        # Convert mask to binary
-        mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-
-        # Apply mask to the original image
-        result = image_np * mask2[:, :, np.newaxis]
+        # ✅ Apply mask using NumPy boolean indexing (faster than multiplication)
+        result = np.zeros_like(image)
+        result[mask_bin] = image[mask_bin]
 
         return result
     
@@ -69,7 +80,7 @@ class DeepLabV3Segmentation:
             self.device = torch.device("cpu")  # Use CPU fallback
 
         # self.model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet101', pretrained=True)
-        self.model = deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.DEFAULT)
+        self.model = deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1)
         self.model.to(self.device)
         self.model.eval()
 
