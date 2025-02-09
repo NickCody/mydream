@@ -83,13 +83,15 @@ class ModelConfigLoader:
         self.pipeline_class = self.config_entry.get("pipeline_class", "StableDiffusionImg2ImgPipeline")
         self.pipeline = None
         
-        # ✅ Determine device and exit if only CPU is available
-        if torch.cuda.is_available():
+        # ✅ Enhanced GPU detection for H200 & other new architectures
+        if torch.cuda.device_count() > 0:
             self.device = "cuda"
+            print(f"✅ GPU Detected: {torch.cuda.get_device_name(0)} (Using CUDA)")
         elif torch.backends.mps.is_available():
             self.device = "mps"
+            print("✅ Using Apple MPS")
         else:
-            print("❌ ERROR: No GPU detected. This program requires a CUDA or MPS-compatible device.")
+            print("❌ ERROR: No compatible GPU detected. This program requires a CUDA or MPS-compatible device.")
             sys.exit(1)  # ✅ Terminate program immediately
 
     @staticmethod
