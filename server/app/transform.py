@@ -50,14 +50,13 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     # Retrieve parameters from config
     params = config_loader.get_parameters()
     codeformer_config = config_loader.config_entry.get("codeformer", {})
-    
-    width=round_to_multiple(params.get("width", 640)),
-    height=round_to_multiple(params.get("height", 512)),
+   
+    standard_size = (round_to_multiple(params.get("width", 640)), round_to_multiple(params.get("height", 512)))
     
     # Standardize on generated size 
-    mask = mask.resize((width, height), Image.LANCZOS)
+    mask = mask.resize(standard_size, Image.LANCZOS)
     bg_mask = ImageOps.invert(mask)
-    input_image = input_image.resize((width, height), Image.LANCZOS)
+    input_image = input_image.resize(standard_size, Image.LANCZOS)
     
     print(f"🎭 Running inpainting for background with {prompt}, parameters: \n{params}")
     result = PIPELINE(
