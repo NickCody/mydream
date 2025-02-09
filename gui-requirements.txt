@@ -1,0 +1,6 @@
+# Audio processing
+PyAudio==0.2.11             # For capturing audio from the microphone
+vosk==0.3.43                # For offline speech recognition
+# GUI
+PyQt5                       # GI
+

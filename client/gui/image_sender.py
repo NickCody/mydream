@@ -56,7 +56,8 @@ class ImageSender(QtCore.QThread):
             
             # Send the request using a retry-enabled session.
             session = get_retry_session(retries=5, backoff_factor=1)
-            response = session.post("http://localhost:8000/api/process", files=files, data=data)
+            #response = session.post("http://localhost:8000/api/process", files=files, data=data)
+            response = session.post("http://192.222.59.107:8000/api/process", files=files, data=data)
             
             if response.status_code == 200:
                 self.finished_signal.emit(response.content)

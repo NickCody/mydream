@@ -16,18 +16,11 @@ transformers
 uvicorn
 tensorflow_datasets
 
-# Audio processing
-PyAudio==0.2.11             # For capturing audio from the microphone
-vosk==0.3.43                # For offline speech recognition
-
 # Image and video processing
 opencv-python               # For video capture and image processing
 mediapipe
 torchvision
 Pillow
-
-# GUI
-PyQt5                       # For building the native GUI interface
 
 # Networking & Utilities
 requests                    # For sending HTTP requests to the server
@@ -51,4 +44,3 @@ tqdm
 yapf
 lpips
 gdown # supports dVwnloading the large file from Google Drive
-basicsr 

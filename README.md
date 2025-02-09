@@ -38,6 +38,9 @@ You need to run the client and the server in two separate terminals. Before runn
 scripts/init-venv.sh
 ```
 
+NOTE: To run the GUI, additionally you need to `pip install gui-requirements.txt`
+
+```bash
 Then activate the `venv`::
 
 ```bash
@@ -75,3 +78,7 @@ Typical config looks like this:
 
 - Configs for server-side image generation models are in `server/config.json`
 - Default prompt is in `client/gui/main_w.py`, lame but will fix later
+
+keys in bashrc
+codeformer
+comment out pyqt and
