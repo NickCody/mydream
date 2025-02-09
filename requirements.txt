@@ -11,7 +11,6 @@ python-multipart
 sentencepiece
 tensorflow
 tensorflow-metal; platform_system == "Darwin"  # For macOS
-torch
 transformers
 uvicorn
 tensorflow_datasets
@@ -19,7 +18,6 @@ tensorflow_datasets
 # Image and video processing
 opencv-python               # For video capture and image processing
 mediapipe
-torchvision
 Pillow
 
 # Networking & Utilities
