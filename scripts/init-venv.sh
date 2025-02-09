@@ -37,12 +37,6 @@ source "$VENV_PATH/bin/activate"
 
 pip3 install --upgrade pip
 
-# Fix CodeFormer
-echo "Installing CodeFormer dependencies ..."
-cd CodeFormer
-./basicsr/setup.py install
-
-
 # Check if a unified requirements.txt exists
 REQUIREMENTS_FILE="$PROJECT_ROOT/requirements.txt"
 if [ ! -f "$REQUIREMENTS_FILE" ]; then
@@ -62,6 +56,12 @@ fi
 # Set PYTHONPATH to include both client and server
 echo "Setting PYTHONPATH for both client/ and server/..."
 export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server:$PROJECT_ROOT/CodeFormer"
+
+# Fix CodeFormer
+source $VENV_PATH/bin/activate
+echo "Installing CodeFormer dependencies ..."
+cd CodeFormer
+./basicsr/setup.py install
 
 echo "Virtual environment setup complete."
 echo "To activate it manually, run: source $VENV_PATH/bin/activate"
