@@ -77,7 +77,8 @@ class DeepLabV3Segmentation:
         elif torch.cuda.is_available():
             self.device = torch.device("cuda")  # Use NVIDIA GPU
         else:
-            self.device = torch.device("cpu")  # Use CPU fallback
+            print("❌ ERROR: No GPU detected. This program requires a CUDA or MPS-compatible device.")
+            sys.exit(1)  # ✅ Terminate program immediately
 
         # self.model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet101', pretrained=True)
         self.model = deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1)

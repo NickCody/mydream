@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import torch
 from diffusers import (
@@ -80,8 +81,16 @@ class ModelConfigLoader:
 
         self.model_name = self.config_entry["model_name"]
         self.pipeline_class = self.config_entry.get("pipeline_class", "StableDiffusionImg2ImgPipeline")
-        self.device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
         self.pipeline = None
+        
+        # ✅ Determine device and exit if only CPU is available
+        if torch.cuda.is_available():
+            self.device = "cuda"
+        elif torch.backends.mps.is_available():
+            self.device = "mps"
+        else:
+            print("❌ ERROR: No GPU detected. This program requires a CUDA or MPS-compatible device.")
+            sys.exit(1)  # ✅ Terminate program immediately
 
     @staticmethod
     def apply_scheduler_to_pipeline(scheduler_config, pipeline):
