@@ -119,7 +119,7 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     background_image = result.images[0]
     # Apply blur to background_image
     if (params.get("blur", None) is not None):
-        background_image = apply_gaussian_blur(background_image, ksize=params.get("blur", 15), sigma=0)
+        background_image = apply_gaussian_blur(background_image, ksize=bg_params.get("blur", 15), sigma=0)
     print(f"Background image: {type(background_image)}: {background_image.size[0]}x{background_image.size[1]}")
 
     print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
