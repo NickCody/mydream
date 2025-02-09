@@ -3,8 +3,8 @@ from app.model import PIPELINE, config_loader
 import math
 import numpy as np
 from diffusers import DPMSolverMultistepScheduler
-import os, sys
 from app.codeformer_api import enhance_faces
+import cv2
 
 def round_to_multiple(value, multiple=64):
     return math.ceil(value / multiple) * multiple
@@ -33,7 +33,34 @@ def apply_codeformer(codeformer_cfg, image):
     else:
         print("\n🚫 CodeFormer enhancement skipped.")
         return image
-    
+
+def apply_gaussian_blur(image: Image.Image, ksize=15, sigma=0):
+    """
+    Applies a Gaussian blur using OpenCV for hardware acceleration.
+
+    Parameters:
+    - image (PIL.Image): The input image.
+    - ksize (int): Kernel size (must be an odd number, e.g., 15).
+    - sigma (float): Standard deviation (0 = auto).
+
+    Returns:
+    - PIL.Image: The blurred image.
+    """
+    # Convert PIL Image to OpenCV (NumPy array)
+    image_cv = np.array(image)  # RGB order
+
+    # Convert RGB to BGR (OpenCV uses BGR)
+    image_cv = cv2.cvtColor(image_cv, cv2.COLOR_RGB2BGR)
+
+    # ✅ Apply Gaussian Blur (Hardware Accelerated)
+    blurred_cv = cv2.GaussianBlur(image_cv, (ksize, ksize), sigma)
+
+    # Convert back to RGB
+    blurred_rgb = cv2.cvtColor(blurred_cv, cv2.COLOR_BGR2RGB)
+
+    # Convert back to PIL image
+    return Image.fromarray(blurred_rgb)
+
 def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask: Image.Image = None) -> Image.Image:
     """
     Transforms the input image based on the provided prompt.
@@ -90,6 +117,9 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     )
     
     background_image = result.images[0]
+    # Apply blur to background_image
+    if (params.get("blur", None) is not None):
+        background_image = apply_gaussian_blur(background_image, ksize=params.get("blur", 15), sigma=0)
     print(f"Background image: {type(background_image)}: {background_image.size[0]}x{background_image.size[1]}")
 
     print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
