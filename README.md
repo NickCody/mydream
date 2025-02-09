@@ -48,7 +48,7 @@ On H200 GPU's, you need to run `nvidia-smi` and note the CUDA Version:
 And run the appropriate torch install:
 
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
 ```
 
 ### SPEECH RECOGNITION SETUP

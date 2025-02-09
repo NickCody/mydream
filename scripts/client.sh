@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python -m main"$@" || echo "Exited"
+python -m main "$@" || echo "Exited"
 

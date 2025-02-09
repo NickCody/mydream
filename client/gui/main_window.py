@@ -9,8 +9,8 @@ from gui.image_display_widget import ImageDisplayWidget
 from gui.image_sender import ImageSender
 from audio.audio_worker import AudioWorker
 
-DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, ultra-realistic portrait, high quality"""
-# DEFAULT_PROMPT = r"""Young (handsome) [pedro pascal|antonio banderas], dressed in toga, wavy luxurious hair"""
+# DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, ultra-realistic portrait, high quality"""
+DEFAULT_PROMPT = r"""Young (handsome) [pedro pascal|antonio banderas], dressed in star trek uniform, ultra-realistic portrait, high quality"""
 # DEFAULT_BG_PROMPT = r"""greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp"""
 DEFAULT_BG_PROMPT = r"""blurred starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
 # --- Main Window (combines video feed, image sending, and audio transcription) ---

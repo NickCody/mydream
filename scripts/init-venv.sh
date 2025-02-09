@@ -64,7 +64,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     pip install -r gui-requirements.txt
 else
     echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
 fi
 
 echo "✅ PyTorch installation complete!"
