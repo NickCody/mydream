@@ -61,7 +61,7 @@ export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server:$PROJECT_ROOT/CodeF
 source $VENV_PATH/bin/activate
 echo "Installing CodeFormer dependencies ..."
 cd CodeFormer
-./basicsr/setup.py install
+python ./basicsr/setup.py install
 
 echo "Virtual environment setup complete."
 echo "To activate it manually, run: source $VENV_PATH/bin/activate"
