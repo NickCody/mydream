@@ -119,12 +119,14 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     background_image = result.images[0]
     # Apply blur to background_image
     if (params.get("blur", None) is not None):
+        print(f"Applying blur to background image with ksize={bg_params.get('blur', 15)}")
         background_image = apply_gaussian_blur(background_image, ksize=bg_params.get("blur", 15), sigma=0)
+    else:
+        print("Skipping blur for background image")
     print(f"Background image: {type(background_image)}: {background_image.size[0]}x{background_image.size[1]}")
 
     print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
-    scaled_mask = mask.resize(foreground_image.size, Image.LANCZOS)
-    final_image = Image.composite(foreground_image, background_image, scaled_mask)
+    final_image = Image.composite(foreground_image, background_image, mask)
     
     # ✅ Print generated image details after CodeFormer processing
     print("\n📸 Output Image Details (After CodeFormer Enhancement):")
