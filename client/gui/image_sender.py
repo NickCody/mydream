@@ -34,11 +34,12 @@ class ImageSender(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(bytes)
     error_signal = QtCore.pyqtSignal(str)
     
-    def __init__(self, frame, prompt, server_url, parent=None):
+    def __init__(self, frame, prompt, bg_prompt, server_url, parent=None):
         super(ImageSender, self).__init__(parent)
         self.server_url = server_url
         self.frame = frame
         self.prompt = prompt
+        self.bg_prompt = bg_prompt
         
     def run(self):
         try:
@@ -53,7 +54,7 @@ class ImageSender(QtCore.QThread):
             files = {
                 "image": ("frame.png", png_data.tobytes(), "image/png")  # Updated to PNG
             }
-            data = {"prompt": self.prompt}
+            data = {"prompt": self.prompt, "bg_prompt": self.bg_prompt}
             
             # Send the request using a retry-enabled session.
             session = get_retry_session(retries=5, backoff_factor=1)

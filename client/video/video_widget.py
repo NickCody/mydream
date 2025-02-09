@@ -70,7 +70,7 @@ class VideoWidget(QtWidgets.QLabel):
         if ret:
             # Apply background removal before converting to RGB
             frame = self.bg_remover.process(frame)
-            hinted_frame = self.blend_background(frame, color=(0, 0, 0), alpha=0.95)
+            hinted_frame = self.blend_background(frame, color=(0, 0, 0), alpha=0.8)
             # hinted_frame = frame
              
             # Convert processed frame to RGB for Qt display
@@ -82,7 +82,7 @@ class VideoWidget(QtWidgets.QLabel):
             scaled_pixmap = pixmap.scaled(self.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
             self.setPixmap(scaled_pixmap)
             
-            self.last_frame = hinted_frame
+            self.last_frame = frame
             
     def get_current_frame(self):
         """Return the most recent successfully captured frame."""

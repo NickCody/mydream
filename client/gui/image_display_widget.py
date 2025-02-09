@@ -21,7 +21,7 @@ class ImageDisplayWidget(QtWidgets.QGraphicsView):
         pixmap = QtGui.QPixmap.fromImage(image)
 
         # Stretch factor (adjust as needed)
-        stretch_factor = 1.25  # 1.5x wider than the original
+        stretch_factor = 1.0 # 1.5x wider than the original
         
         # Scale the pixmap
         scaled_pixmap = pixmap.scaled(

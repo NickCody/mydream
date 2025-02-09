@@ -1,4 +1,5 @@
 import sys
+import cv2
 import argparse
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QSystemTrayIcon
@@ -8,16 +9,10 @@ from gui.image_display_widget import ImageDisplayWidget
 from gui.image_sender import ImageSender
 from audio.audio_worker import AudioWorker
 
-# DEFAULT_PROMPT = r"""
-# Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in toga
-# greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp
-# """
-
-DEFAULT_PROMPT = r"""
-Young (handsome) [pedro pascal|antonio banderas], dressed in toga
-greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp
-"""
-
+DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, ultra-realistic portrait, high quality"""
+# DEFAULT_PROMPT = r"""Young (handsome) [pedro pascal|antonio banderas], dressed in toga, wavy luxurious hair"""
+# DEFAULT_BG_PROMPT = r"""greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp"""
+DEFAULT_BG_PROMPT = r"""blurred starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
 # --- Main Window (combines video feed, image sending, and audio transcription) ---
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -116,7 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
         processed_layout = QtWidgets.QHBoxLayout()
         processed_layout.setAlignment(QtCore.Qt.AlignCenter)
         self.processed_label = ImageDisplayWidget(self)
-        self.processed_label.setFixedSize(1024, 512)
+        self.processed_label.setFixedHeight(512)
         processed_layout.addWidget(self.processed_label)
         main_layout.addLayout(processed_layout)
        
@@ -157,6 +152,43 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.voice_text_box.setPlainText(text)
     
+    @staticmethod    
+    def resize_and_crop(frame, target_width=640, target_height=512):
+        """
+        Resizes an image to fit the given target height while keeping the aspect ratio,
+        then crops the width to exactly `target_width` (centered).
+
+        Parameters:
+        - frame (numpy.ndarray): Input image.
+        - target_width (int): Desired output width after cropping (default: 640).
+        - target_height (int): Desired output height after resizing (default: 512).
+
+        Returns:
+        - Cropped and resized image (numpy.ndarray).
+        """
+
+        # Step 1: Get original dimensions
+        orig_height, orig_width = frame.shape[:2]
+
+        # Step 2: Compute new width while keeping aspect ratio
+        new_width = int((target_height / orig_height) * orig_width)
+
+        # Step 3: Resize the image while keeping aspect ratio
+        frame_resized = cv2.resize(frame, (new_width, target_height), interpolation=cv2.INTER_AREA)
+
+        # Step 4: Crop left/right to get exactly target_width
+        crop_x_start = max(0, (new_width - target_width) // 2)  # Center cropping
+        crop_x_end = crop_x_start + target_width
+
+        # Ensure we don't crop beyond image bounds
+        if crop_x_end > new_width:
+            crop_x_end = new_width
+            crop_x_start = crop_x_end - target_width
+
+        frame_cropped = frame_resized[:, crop_x_start:crop_x_end]
+
+        return frame_cropped    
+
     def process_next_frame(self):
         """
         Continually capture a frame from OpenCV and send it to the server.
@@ -176,11 +208,19 @@ class MainWindow(QtWidgets.QMainWindow):
             QtCore.QTimer.singleShot(100, self.process_next_frame)
             return
         
+        # resize frame to 640x512 maintain aspect ratio and crop left/right
+        frame = self.resize_and_crop(frame, 1280, 1024)
+        
+        # Setup prompts
         self.request_in_progress = True
-        prompt = self.voice_text_box.toPlainText().strip()  # May be blank if no transcription.
-        if not prompt:
-            prompt = ""  # Explicitly use an empty prompt if nothing is heard.
-        self.sender_thread = ImageSender(frame, prompt + "," + self.static_text_box.toPlainText().strip(), self.server_url)
+        voice_prompt = f"({self.voice_text_box.toPlainText().strip()}:1.5)"  # May be blank if no transcription.
+        if not voice_prompt:
+            voice_prompt = ""  # Explicitly use an empty prompt if nothing is heard.
+            
+        prompt = f"{voice_prompt}, {self.static_text_box.toPlainText().strip()}"
+        bg_prompt = DEFAULT_BG_PROMPT
+                
+        self.sender_thread = ImageSender(frame, prompt, bg_prompt, self.server_url)
         self.sender_thread.finished_signal.connect(self.handle_server_response)
         self.sender_thread.error_signal.connect(self.handle_server_error)
         self.sender_thread.start()

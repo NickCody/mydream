@@ -5,35 +5,39 @@ from PIL import Image
 import traceback
 import numpy as np
 from app.transform import transform_image  # Your img2img/inpainting pipeline
+from datetime import datetime
 
 app = FastAPI()
 
 # Global counter for saved images
 image_counter = 1
+img_prefix = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 @app.post("/api/process")
 async def process_image(
     image: UploadFile = File(...),  # Expect an image file upload
-    prompt: str = Form(...)         # Expect a text prompt as form data
+    prompt: str = Form(...),  
+    bg_prompt: str = Form(...)
 ):
     """
     Endpoint to process an input image with a given prompt.
     
     Expects:
       - image: The input image file (supports PNG with transparency).
-      - prompt: A text prompt describing the transformation.
+      - prompt: A text prompt describing the person's transformation.
+      - bg_prompt: A text prompt describing the background transformation.
     
     Returns:
       - A PNG image where the AI has inpainted the missing background.
     """
     
-    print("process_image")
     try:
         # STEP 1: Read the uploaded image bytes
         image_bytes = await image.read()
 
         # STEP 2: Open the image with PIL
         input_image = Image.open(io.BytesIO(image_bytes))
+        print(f"🔹 input_image  (orig): {type(input_image)}, size: {input_image.size}")
 
         # STEP 3: Handle transparency (Extract Alpha Channel)
         if input_image.mode == "RGBA":
@@ -45,21 +49,17 @@ async def process_image(
             # Create a binary mask (white = keep, black = generate)
             mask = Image.new("L", input_image.size, 0)
             mask.paste(alpha, (0, 0))  # Apply alpha as the inpainting mask
-            
-            # Convert mask to NumPy array for debugging (optional)
-            mask_np = np.array(mask)
-            mask.save("temp/mask.png")  # Save mask for debugging (optional)
+            print(f"🔹 Mask type (orig): {type(mask)}, size: {mask.size}")
             
             # Remove transparency from original image (so model sees only the subject)
             input_image = input_image.convert("RGB")
 
         else:
-            # Ensure the image is in RGB mode (standard for diffusion models)
-            input_image = input_image.convert("RGB")
-            mask = None  # No mask needed for non-transparent images
-
+            print("Error: Non-transparent image detected, skipping!")
+            return
+        
         # STEP 4: Process the image using AI inpainting
-        output_image = transform_image(input_image, prompt, mask=mask).convert("RGB")
+        output_image = transform_image(input_image, prompt, bg_prompt, mask=mask)
 
         # STEP 5: Save the output image as PNG (to preserve transparency)
         buffer = io.BytesIO()
@@ -68,7 +68,7 @@ async def process_image(
 
         # STEP 6: Save the output image to disk for debugging
         global image_counter
-        filename = f"temp/rumple{image_counter:02d}.png"
+        filename = f"temp/rumple_{img_prefix}_{image_counter:d}.png"
         output_image.save(filename, format="PNG")
         print(f"Saved processed image as {filename}")
         image_counter += 1

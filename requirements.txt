@@ -9,8 +9,9 @@ pillow
 protobuf
 python-multipart
 sentencepiece
-tensorflow
-tensorflow-metal; platform_system == "Darwin"  # For macOS
+tensorflow-macos; platform_system == "Darwin"  # macOS TensorFlow
+tensorflow-metal; platform_system == "Darwin"  # macOS GPU acceleration
+tensorflow; platform_system == "Linux" or platform_system == "Windows"  # Standard TensorFlow for Linux & Windows
 transformers
 uvicorn
 tensorflow_datasets
@@ -22,7 +23,7 @@ Pillow
 
 # Networking & Utilities
 requests                    # For sending HTTP requests to the server
-numpy
+numpy<2
 
 # Codeformer requirements
 addict

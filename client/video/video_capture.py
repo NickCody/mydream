@@ -15,9 +15,6 @@ class VideoCaptureHandler:
         self.cap = cv2.VideoCapture(camera_index)
         if not self.cap.isOpened():
             raise RuntimeError("Unable to access the camera.")
-
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         
     def get_frame(self):
         """

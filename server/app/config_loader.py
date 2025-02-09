@@ -43,6 +43,45 @@ import os
 from safetensors.torch import load_file
 from app.codeformer_api import load_codeformer
 
+# Use Hugging Face Diffusers pipelines
+pipeline_mapping = {
+    "AutoPipelineForImage2Image": AutoPipelineForImage2Image,
+    "AltDiffusionImg2ImgPipeline": AltDiffusionImg2ImgPipeline,
+    "AmusedImg2ImgPipeline": AmusedImg2ImgPipeline,
+    "FlaxStableDiffusionImg2ImgPipeline": FlaxStableDiffusionImg2ImgPipeline,
+    "FluxControlImg2ImgPipeline": FluxControlImg2ImgPipeline,
+    "FluxControlNetImg2ImgPipeline": FluxControlNetImg2ImgPipeline,
+    "FluxImg2ImgPipeline": FluxImg2ImgPipeline,
+    "IFImg2ImgPipeline": IFImg2ImgPipeline,
+    "IFImg2ImgSuperResolutionPipeline": IFImg2ImgSuperResolutionPipeline,
+    "Kandinsky3Img2ImgPipeline": Kandinsky3Img2ImgPipeline,
+    "KandinskyImg2ImgCombinedPipeline": KandinskyImg2ImgCombinedPipeline,
+    "KandinskyImg2ImgPipeline": KandinskyImg2ImgPipeline,
+    "KandinskyV22ControlnetImg2ImgPipeline": KandinskyV22ControlnetImg2ImgPipeline,
+    "KandinskyV22Img2ImgCombinedPipeline": KandinskyV22Img2ImgCombinedPipeline,
+    "KandinskyV22Img2ImgPipeline": KandinskyV22Img2ImgPipeline,
+    "KolorsImg2ImgPipeline": KolorsImg2ImgPipeline,
+    "LatentConsistencyModelImg2ImgPipeline": LatentConsistencyModelImg2ImgPipeline,
+    "OnnxStableDiffusionImg2ImgPipeline": OnnxStableDiffusionImg2ImgPipeline,
+    "ShapEImg2ImgPipeline": ShapEImg2ImgPipeline,
+    "StableDiffusionInpaintPipeline": StableDiffusionInpaintPipeline,
+    "StableDiffusion3Img2ImgPipeline": StableDiffusion3Img2ImgPipeline,
+    "StableDiffusion3PAGImg2ImgPipeline": StableDiffusion3PAGImg2ImgPipeline,
+    "StableDiffusionControlNetImg2ImgPipeline": StableDiffusionControlNetImg2ImgPipeline,
+    "StableDiffusionImg2ImgPipeline": StableDiffusionImg2ImgPipeline,
+    "StableDiffusionPAGImg2ImgPipeline": StableDiffusionPAGImg2ImgPipeline,
+    "StableDiffusionXLControlNetImg2ImgPipeline": StableDiffusionXLControlNetImg2ImgPipeline,
+    "StableDiffusionXLControlNetPAGImg2ImgPipeline": StableDiffusionXLControlNetPAGImg2ImgPipeline,
+    "StableDiffusionXLControlNetUnionImg2ImgPipeline": StableDiffusionXLControlNetUnionImg2ImgPipeline,
+    "StableDiffusionXLImg2ImgPipeline": StableDiffusionXLImg2ImgPipeline,
+    "StableDiffusionXLPAGImg2ImgPipeline": StableDiffusionXLPAGImg2ImgPipeline,
+    "StableUnCLIPImg2ImgPipeline": StableUnCLIPImg2ImgPipeline
+}
+
+scheduler_mapping = {
+    "DPM": DPMSolverMultistepScheduler,
+    "EulerAncestralDiscreteScheduler": EulerAncestralDiscreteScheduler
+}
 
 os.environ["KERAS_BACKEND"] = "jax"
 
@@ -65,15 +104,17 @@ if not HF_TOKEN:
 # Load Config File
 CONFIG_PATH = "server/config.json"
 
-try:
-    with open(CONFIG_PATH, "r") as f:
-        config_data = json.load(f)
-except Exception as e:
-    raise RuntimeError(f"❌ Error loading config file: {e}")
 
 class ModelConfigLoader:
     def __init__(self, config_name: str):
         """ Loads the correct model configuration from config.json """
+        
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config_data = json.load(f)
+        except Exception as e:
+            raise RuntimeError(f"❌ Error loading config file: {e}")
+
         self.config_name = config_name
         self.config_entry = config_data.get(self.config_name, {})
         if not self.config_entry:
@@ -106,15 +147,11 @@ class ModelConfigLoader:
         Returns:
         - None (modifies pipeline in-place).
         """
+        global scheduler_mapping
+        
         if not scheduler_config or not isinstance(scheduler_config, dict):
             print("⚠️ No scheduler configuration provided. Using default scheduler.")
             return
-
-        # Scheduler mapping
-        scheduler_mapping = {
-            "DPM": DPMSolverMultistepScheduler,
-            "EulerAncestralDiscreteScheduler": EulerAncestralDiscreteScheduler
-        }
 
         scheduler_type = scheduler_config.get("type")
         scheduler_class = scheduler_mapping.get(scheduler_type)
@@ -206,17 +243,21 @@ class ModelConfigLoader:
             print(f"❌ Error applying LoRA: {e}")
             
     def initialize_pipeline(self):
+        global pipeline_mapping
+        
         print(f"🚀 Loading model: {self.config_name} ({self.model_name})")
         print(f"📂 Cache directory: {HF_CACHE}")
         print(f"🔄 Using pipeline: {self.pipeline_class}")
 
-        seed = self.config_entry.get("seed", None)
+        self.current_seed = self.config_entry.get("seed", None)
 
-        if seed is not None:
-            print(f"🎲 Using fixed seed: {seed}")
-            generator = torch.manual_seed(seed)  # Set seed for reproducibility
+        if self.current_seed is not None:
+            print(f"🎲 Using fixed seed: {current_seed}")
+            generator = torch.manual_seed(current_seed)  # Set manual seed
         else:
-            generator = None  # Randomized generation
+            current_seed = torch.randint(0, 2**32 - 1, (1,)).item()  # Generate a random seed
+            print(f"🎲 Using random seed: {current_seed}")
+            generator = torch.manual_seed(current_seed)  # Set the generated seed
 
         # 🔹 Ensure generator is passed into pipeline calls
         self.generator = generator
@@ -237,41 +278,6 @@ class ModelConfigLoader:
                 self.pipeline = StableDiffusion3ImageToImage.from_preset(self.model_name)
 
             else:
-                # Use Hugging Face Diffusers pipelines
-                pipeline_mapping = {
-                    "AltDiffusionImg2ImgPipeline": AltDiffusionImg2ImgPipeline,
-                    "AmusedImg2ImgPipeline": AmusedImg2ImgPipeline,
-                    "FlaxStableDiffusionImg2ImgPipeline": FlaxStableDiffusionImg2ImgPipeline,
-                    "FluxControlImg2ImgPipeline": FluxControlImg2ImgPipeline,
-                    "FluxControlNetImg2ImgPipeline": FluxControlNetImg2ImgPipeline,
-                    "FluxImg2ImgPipeline": FluxImg2ImgPipeline,
-                    "IFImg2ImgPipeline": IFImg2ImgPipeline,
-                    "IFImg2ImgSuperResolutionPipeline": IFImg2ImgSuperResolutionPipeline,
-                    "Kandinsky3Img2ImgPipeline": Kandinsky3Img2ImgPipeline,
-                    "KandinskyImg2ImgCombinedPipeline": KandinskyImg2ImgCombinedPipeline,
-                    "KandinskyImg2ImgPipeline": KandinskyImg2ImgPipeline,
-                    "KandinskyV22ControlnetImg2ImgPipeline": KandinskyV22ControlnetImg2ImgPipeline,
-                    "KandinskyV22Img2ImgCombinedPipeline": KandinskyV22Img2ImgCombinedPipeline,
-                    "KandinskyV22Img2ImgPipeline": KandinskyV22Img2ImgPipeline,
-                    "KolorsImg2ImgPipeline": KolorsImg2ImgPipeline,
-                    "LatentConsistencyModelImg2ImgPipeline": LatentConsistencyModelImg2ImgPipeline,
-                    "OnnxStableDiffusionImg2ImgPipeline": OnnxStableDiffusionImg2ImgPipeline,
-                    "ShapEImg2ImgPipeline": ShapEImg2ImgPipeline,
-                    "StableDiffusionInpaintPipeline": StableDiffusionInpaintPipeline,
-                    "StableDiffusion3Img2ImgPipeline": StableDiffusion3Img2ImgPipeline,
-                    "StableDiffusion3PAGImg2ImgPipeline": StableDiffusion3PAGImg2ImgPipeline,
-                    "StableDiffusionControlNetImg2ImgPipeline": StableDiffusionControlNetImg2ImgPipeline,
-                    "StableDiffusionImg2ImgPipeline": StableDiffusionImg2ImgPipeline,
-                    "StableDiffusionPAGImg2ImgPipeline": StableDiffusionPAGImg2ImgPipeline,
-                    "StableDiffusionXLControlNetImg2ImgPipeline": StableDiffusionXLControlNetImg2ImgPipeline,
-                    "StableDiffusionXLControlNetPAGImg2ImgPipeline": StableDiffusionXLControlNetPAGImg2ImgPipeline,
-                    "StableDiffusionXLControlNetUnionImg2ImgPipeline": StableDiffusionXLControlNetUnionImg2ImgPipeline,
-                    "StableDiffusionXLImg2ImgPipeline": StableDiffusionXLImg2ImgPipeline,
-                    "StableDiffusionXLPAGImg2ImgPipeline": StableDiffusionXLPAGImg2ImgPipeline,
-                    "StableUnCLIPImg2ImgPipeline": StableUnCLIPImg2ImgPipeline,
-                    "AutoPipelineForImage2Image": AutoPipelineForImage2Image
-                }
-                
                 PipelineClass = pipeline_mapping.get(self.pipeline_class)
                 if not PipelineClass:
                     raise ValueError(f"❌ Invalid pipeline_class '{self.pipeline_class}' in config.")
@@ -283,7 +289,6 @@ class ModelConfigLoader:
                 scheduler_mapping = {
                     "DPM": DPMSolverMultistepScheduler,
                     "EulerAncestralDiscreteScheduler": EulerAncestralDiscreteScheduler,
-                    "DPM": DPMSolverMultistepScheduler
                 }
 
                 # 🔹 Load the pipeline
@@ -294,7 +299,7 @@ class ModelConfigLoader:
                     torch_dtype=torch_dtype,  # Uses None if unspecified
                     variant=variant,  # Uses None if unspecified
                     use_safetensors=True,
-                    generator=self.generator
+                    generator=self.generator,
                 ).to(self.device)
 
                 # 🔹 Apply scheduler (if configured)
@@ -311,3 +316,7 @@ class ModelConfigLoader:
     def get_parameters(self):
         """ Retrieves model-specific generation parameters from config. """
         return self.config_entry.get("parameters", {})
+    
+    def get_bg_parameters(self):
+        """ Retrieves model-specific background generation parameters from config. """
+        return self.config_entry.get("bg_parameters", self.get_parameters())

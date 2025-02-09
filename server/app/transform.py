@@ -9,86 +9,21 @@ from app.codeformer_api import enhance_faces
 def round_to_multiple(value, multiple=64):
     return math.ceil(value / multiple) * multiple
 
-def transform_image(input_image: Image.Image, prompt: str, mask: Image.Image = None) -> Image.Image:
-    """
-    Transforms the input image based on the provided prompt.
-    Supports inpainting if a mask is provided and applies CodeFormer if enabled.
-    
-    - White areas in the mask are preserved.
-    - Black areas in the mask are AI-generated.
-    """
-
-    # Retrieve parameters from config
-    params = config_loader.get_parameters()
-    strength = params.get("strength", 0.2)
-    num_inference_steps = params.get("num_inference_steps", 20)
-    guidance_scale = params.get("guidance_scale", 4)
-    width = round_to_multiple(params.get("width", 512))
-    height = round_to_multiple(params.get("height", 512))
-    negative_prompt = params.get("negative_prompt", "")
-
+def apply_codeformer(codeformer_cfg, image):
+    print(f"codeformer_cfg: {codeformer_cfg}")
     # Retrieve CodeFormer settings
-    codeformer_config = params.get("codeformer", {})
-    codeformer_enabled = codeformer_config.get("enabled", True)
-    codeformer_weight = codeformer_config.get("weight", 0.7)
-    codeformer_upscale = codeformer_config.get("upscale", 1)
-    codeformer_has_aligned = codeformer_config.get("has_aligned", False)
-    codeformer_paste_back = codeformer_config.get("paste_back", True)
-
-    print(f"Rendering image with prompt: {prompt}")
-    print(f"width: {width}, height: {height}, num_steps: {num_inference_steps}")
-
-    # ✅ Ensure image is in the correct format and size
-    input_image = input_image.convert("RGB").resize((width, height), Image.Resampling.LANCZOS)
-
-    # ✅ Process mask if provided
-    if mask is not None:
-        print("🔹 Detected mask: Resizing and converting to grayscale")
-        mask = mask.convert("L").resize((width, height), Image.Resampling.LANCZOS)
-      
-        mask = mask.point(lambda p: 255 if p > 127 else 0)
-        print("✅ Mask forced to pure black & white") 
-        
-        # Save for visual inspection
-        mask.save("temp/debug_mask.png")
-        print("Saved debug mask as debug_mask.png for verification")
-
-        # Debugging: Check pixel values in the mask
-        mask_np = np.array(mask)
-        print(f"Mask Debug - Min: {mask_np.min()}, Max: {mask_np.max()}, Mean: {mask_np.mean()}")
+    codeformer_enabled = codeformer_cfg.get("enabled", False)
     
-    # ✅ Call the pipeline with or without a mask
-    if mask is not None:
-        print("🎭 Running inpainting mode...")
-        result = PIPELINE(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            guidance_scale=guidance_scale,
-            num_inference_steps=num_inference_steps,
-            image=input_image,
-            mask_image=mask,  # Pass the mask for inpainting
-            strength=strength
-        )
-    else:
-        print("🎨 Running regular img2img mode...")
-        result = PIPELINE(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            guidance_scale=guidance_scale,
-            num_inference_steps=num_inference_steps,
-            image=input_image,
-            strength=strength
-        )
-
-    # Get generated image
-    generated_image = result.images[0]
-
     # ✅ Apply CodeFormer enhancement if enabled
     if codeformer_enabled:
+        codeformer_weight = codeformer_cfg.get("weight", 0.7)
+        codeformer_upscale = codeformer_cfg.get("upscale", 1)
+        codeformer_has_aligned = codeformer_cfg.get("has_aligned", False)
+        codeformer_paste_back = codeformer_cfg.get("paste_back", True)
         print(f"\n✨ Applying CodeFormer face enhancement (weight={codeformer_weight})...")
-        enhanced_image = enhance_faces(
+        return enhance_faces(
             config_loader.device,
-            generated_image,
+            image,
             enabled=codeformer_enabled,
             weight=codeformer_weight,
             upscale=codeformer_upscale,
@@ -97,28 +32,68 @@ def transform_image(input_image: Image.Image, prompt: str, mask: Image.Image = N
         )
     else:
         print("\n🚫 CodeFormer enhancement skipped.")
-        enhanced_image = generated_image  # Use the original output
+        return image
+    
+def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask: Image.Image = None) -> Image.Image:
+    """
+    Transforms the input image based on the provided prompt.
+    Supports inpainting if a mask is provided and applies CodeFormer if enabled.
+    
+    - White areas in the mask are preserved.
+    - Black areas in the mask are AI-generated.
+    """
+    
+    # ✅ Call the pipeline with or without a mask
+    if mask is None:
+        raise ValueError("Mask is required for inpainting mode.")
+    
+    bg_mask = ImageOps.invert(mask)
 
-    # Print formatted parameter details
-    print("\n🎨 Generation Parameters:")
-    print(f"  - Strength: {strength}")
-    print(f"  - Inference Steps: {num_inference_steps}")
-    print(f"  - Guidance Scale: {guidance_scale}")
-    print(f"  - Width: {width}")
-    print(f"  - Height: {height}")
-    print(f"  - Negative Prompt: {negative_prompt if negative_prompt else 'None'}")
-    print(f"  - Inpainting Mode: {'Enabled' if mask is not None else 'Disabled'}")
+    # Retrieve parameters from config
+    params = config_loader.get_parameters()
+    codeformer_config = config_loader.config_entry.get("codeformer", {})
+    print(f"🎭 Running inpainting for background with {prompt}, parameters: \n{params}")
+    result = PIPELINE(
+        prompt=prompt,
+        width=round_to_multiple(params.get("width", 640)),
+        height=round_to_multiple(params.get("height", 512)),
+        negative_prompt=params.get("negative_prompt", ""),
+        guidance_scale=params.get("guidance_scale", 4),
+        num_inference_steps=params.get("num_inference_steps", 20),
+        image=input_image,
+        mask_image=mask,  # Pass the mask for inpainting
+        strength=params.get("strength", 0.2)
+    )
+   
+    foreground_image = result.images[0] 
+    foreground_image = apply_codeformer(codeformer_config, foreground_image)
+    print(f"Foreground image: {type(foreground_image)}: {foreground_image.size[0]}x{foreground_image.size[1]}")
+    
+    bg_params = config_loader.get_bg_parameters()
+    print(f"🎭 Running inpainting for background with {bg_prompt}, parameters: \n{bg_params}")
+    result = PIPELINE(
+        prompt=bg_prompt,
+        width=round_to_multiple(bg_params.get("width", 640)),
+        height=round_to_multiple(bg_params.get("height", 512)),
+        negative_prompt=bg_params.get("negative_prompt", ""),
+        guidance_scale=bg_params.get("guidance_scale", 4),
+        num_inference_steps=bg_params.get("num_inference_steps", 20),
+        image=input_image,
+        mask_image=bg_mask,  # Pass the mask for inpainting
+        strength=bg_params.get("strength", 0.2)
+    )
+    
+    background_image = result.images[0]
+    print(f"Background image: {type(background_image)}: {background_image.size[0]}x{background_image.size[1]}")
 
+    print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
+    scaled_mask = mask.resize(foreground_image.size, Image.LANCZOS)
+    final_image = Image.composite(foreground_image, background_image, scaled_mask)
+    
     # ✅ Print generated image details after CodeFormer processing
     print("\n📸 Output Image Details (After CodeFormer Enhancement):")
-    print(f"Final Image Size: {enhanced_image.size[0]}x{enhanced_image.size[1]}")
-    np_image = np.array(enhanced_image)
+    print(f"Final Image Size: {final_image.size[0]}x{final_image.size[1]}")
+    np_image = np.array(final_image)
     print(f"Image Stats - Min: {np_image.min()}, Max: {np_image.max()}, Mean: {np_image.mean()}")
 
-    # Save debug images
-    generated_image.save("temp/debug_generated_image.png")
-    enhanced_image.save("temp/debug_enhanced_image.png")
-    print("✅ Saved generated image as debug_generated_image.png")
-    print("✅ Saved enhanced image as debug_enhanced_image.png")
-
-    return enhanced_image  # Return final enhanced image
+    return final_image 

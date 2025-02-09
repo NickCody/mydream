@@ -29,6 +29,28 @@ python3 -m pip install jax-metal
 git clone --branch 2025-02-08-nickcody git@github.com:NickCody/CodeFormer.git
 ```
 
+On H200 GPU's, you need to run `nvidia-smi` and note the CUDA Version:
+
+```text
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.127.08             Driver Version: 550.127.08     CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GH200 480GB             On  |   00000000:DD:00.0 Off |                    0 |
+| N/A   39C    P0            253W /  700W |    9446MiB /  97871MiB |     14%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+```
+
+And run the appropriate torch install:
+
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade
+```
+
 ### SPEECH RECOGNITION SETUP
 
 Download model to client/audio/models:
@@ -83,7 +105,7 @@ Typical config looks like this:
 ## NOTES
 
 - Configs for server-side image generation models are in `server/config.json`
-- Default prompt is in `client/gui/main_w.py`, lame but will fix later
+- Default prompt is in `client/gui/main_window.py`, lame but will fix later
 
 keys in bashrc
 codeformer
