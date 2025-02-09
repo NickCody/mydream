@@ -34,8 +34,9 @@ class ImageSender(QtCore.QThread):
     finished_signal = QtCore.pyqtSignal(bytes)
     error_signal = QtCore.pyqtSignal(str)
     
-    def __init__(self, frame, prompt, parent=None):
+    def __init__(self, frame, prompt, server_url, parent=None):
         super(ImageSender, self).__init__(parent)
+        self.server_url = server_url
         self.frame = frame
         self.prompt = prompt
         
@@ -57,7 +58,7 @@ class ImageSender(QtCore.QThread):
             # Send the request using a retry-enabled session.
             session = get_retry_session(retries=5, backoff_factor=1)
             #response = session.post("http://localhost:8000/api/process", files=files, data=data)
-            response = session.post("http://192.222.59.107:8000/api/process", files=files, data=data)
+            response = session.post(f"{self.server_url}/api/process", files=files, data=data)
             
             if response.status_code == 200:
                 self.finished_signal.emit(response.content)
