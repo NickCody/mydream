@@ -7,8 +7,11 @@ IFS=$'\n\t'
 # 1. Install Python 3.12.8 using pyenv.
 # 2. Install portaudio using Homebrew.
 
-export CPATH="$(brew --prefix portaudio)/include"
-export LIBRARY_PATH="$(brew --prefix portaudio)/lib"
+# MacOS
+if [ "$(uname)" == "Darwin" ]; then
+  export CPATH="$(brew --prefix portaudio)/include"
+  export LIBRARY_PATH="$(brew --prefix portaudio)/lib"
+fi
 
 # Set project root directory (assumed to be the script's location)
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
