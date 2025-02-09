@@ -2,6 +2,12 @@
 
 NOTE: This README is a work in progress.
 
+## Install from Github
+
+```bash
+bash <(curl -sSL https://raw.githubusercontent.com/NickCody/mydream/main/install-mydream.sh)
+```
+
 ## INSTALL PREREQUISITES
 
 Most of these instructions are for the MacOS on Apple Silicon. Windows instructions will be added later.
