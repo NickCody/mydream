@@ -1,5 +1,5 @@
 from PIL import Image, ImageOps
-from app.model import PIPELINE, config_loader
+from app.model import PIPELINE, FINAL_PIPELINE, config_loader
 import math
 import numpy as np
 from diffusers import DPMSolverMultistepScheduler
@@ -99,7 +99,7 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     )
    
     foreground_image = result.images[0] 
-    foreground_image = apply_codeformer(codeformer_config, foreground_image)
+    # foreground_image = apply_codeformer(codeformer_config, foreground_image)
     print(f"Foreground image: {type(foreground_image)}: {foreground_image.size[0]}x{foreground_image.size[1]}")
     
     bg_params = config_loader.get_bg_parameters()
@@ -126,7 +126,23 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     print(f"Background image: {type(background_image)}: {background_image.size[0]}x{background_image.size[1]}")
 
     print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
-    final_image = Image.composite(foreground_image, background_image, mask)
+    composite_image = Image.composite(foreground_image, background_image, mask)
+   
+    if FINAL_PIPELINE is not None: 
+        print(f"🎭 Final inpaint")
+        result = FINAL_PIPELINE(
+            prompt=prompt + "," + bg_prompt,
+            width=round_to_multiple(params.get("width", 640)),
+            height=round_to_multiple(params.get("height", 512)),
+            negative_prompt=params.get("negative_prompt", ""),
+            guidance_scale=params.get("guidance_scale", 4),
+            num_inference_steps=params.get("num_inference_steps", 20),
+            image=composite_image,
+            strength=params.get("strength", 0.2)
+        )
+        final_image = result.images[0]
+    else:
+        final_image = composite_image;
     
     # ✅ Print generated image details after CodeFormer processing
     print("\n📸 Output Image Details (After CodeFormer Enhancement):")

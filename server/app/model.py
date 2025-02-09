@@ -21,3 +21,4 @@ print(f"🔍 Selected model: {config_name}")
 # Initialize and load the pipeline
 config_loader = ModelConfigLoader(config_name)
 PIPELINE = config_loader.initialize_pipeline()
+FINAL_PIPELINE = config_loader.initialize_final_pipeline()

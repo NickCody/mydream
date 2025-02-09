@@ -122,6 +122,7 @@ class ModelConfigLoader:
 
         self.model_name = self.config_entry["model_name"]
         self.pipeline_class = self.config_entry.get("pipeline_class", "StableDiffusionImg2ImgPipeline")
+        self.final_pipeline_class = self.config_entry.get("final_pipeline_class", "StableDiffusionImg2ImgPipeline")
         self.pipeline = None
         
         # ✅ Enhanced GPU detection for H200 & other new architectures
@@ -251,16 +252,16 @@ class ModelConfigLoader:
 
         self.current_seed = self.config_entry.get("seed", None)
 
-        if self.current_seed is not None:
-            print(f"🎲 Using fixed seed: {current_seed}")
-            generator = torch.manual_seed(current_seed)  # Set manual seed
-        else:
-            current_seed = torch.randint(0, 2**32 - 1, (1,)).item()  # Generate a random seed
-            print(f"🎲 Using random seed: {current_seed}")
-            generator = torch.manual_seed(current_seed)  # Set the generated seed
+        # if self.current_seed is not None:
+        #     print(f"🎲 Using fixed seed: {current_seed}")
+        #     generator = torch.manual_seed(current_seed)  # Set manual seed
+        # else:
+        #     current_seed = torch.randint(0, 2**32 - 1, (1,)).item()  # Generate a random seed
+        #     print(f"🎲 Using random seed: {current_seed}")
+        #     generator = torch.manual_seed(current_seed)  # Set the generated seed
 
-        # 🔹 Ensure generator is passed into pipeline calls
-        self.generator = generator
+        # # 🔹 Ensure generator is passed into pipeline calls
+        # self.generator = generator
 
         # ✅ Load CodeFormer if enabled in config
         codeformer_config = self.config_entry.get("codeformer", {})
@@ -299,7 +300,6 @@ class ModelConfigLoader:
                     torch_dtype=torch_dtype,  # Uses None if unspecified
                     variant=variant,  # Uses None if unspecified
                     use_safetensors=True,
-                    generator=self.generator,
                 ).to(self.device)
 
                 # 🔹 Apply scheduler (if configured)
@@ -313,6 +313,73 @@ class ModelConfigLoader:
 
         return self.pipeline
 
+    def initialize_final_pipeline(self):
+        global pipeline_mapping
+        
+        # 🔹 Select appropriate pipeline
+        if self.final_pipeline_class == None:
+            print("⚠️ No final pipeline class specified. Using default pipeline only.")
+            return None
+        
+        print(f"🚀 Loading model: {self.config_name} ({self.model_name})")
+        print(f"📂 Cache directory: {HF_CACHE}")
+        print(f"🔄 Using pipeline: {self.final_pipeline_class}")
+
+        self.current_seed = self.config_entry.get("seed", None)
+
+        # if self.current_seed is not None:
+        #     print(f"🎲 Using fixed seed: {current_seed}")
+        #     generator = torch.manual_seed(current_seed)  # Set manual seed
+        # else:
+        #     current_seed = torch.randint(0, 2**32 - 1, (1,)).item()  # Generate a random seed
+        #     print(f"🎲 Using random seed: {current_seed}")
+        #     generator = torch.manual_seed(current_seed)  # Set the generated seed
+
+        # # 🔹 Ensure generator is passed into pipeline calls
+        # self.generator = generator
+
+        # ✅ Load CodeFormer if enabled in config
+        codeformer_config = self.config_entry.get("codeformer", {})
+        if codeformer_config.get("enabled", True):
+            print("🔹 Initializing CodeFormer for face enhancement...")
+            load_codeformer(self.device)
+            
+        try:
+                
+            PipelineClass = pipeline_mapping.get(self.final_pipeline_class)
+            if not PipelineClass:
+                raise ValueError(f"❌ Invalid pipeline_class '{self.pipeline_class}' in config.")
+
+            # 🔹 Get dtype and variant
+            torch_dtype, variant = self.get_torch_dtype_and_variant(self.config_entry)
+        
+            # 🔹 Define scheduler mapping
+            scheduler_mapping = {
+                "DPM": DPMSolverMultistepScheduler,
+                "EulerAncestralDiscreteScheduler": EulerAncestralDiscreteScheduler,
+            }
+
+            # 🔹 Load the pipeline
+            self.final_pipeline = PipelineClass.from_pretrained(
+                self.model_name,
+                cache_dir=HF_CACHE,
+                token=HF_TOKEN,
+                torch_dtype=torch_dtype,  # Uses None if unspecified
+                variant=variant,  # Uses None if unspecified
+                use_safetensors=True,
+            ).to(self.device)
+
+            # 🔹 Apply scheduler (if configured)
+            self.apply_scheduler_to_pipeline(self.config_entry.get("scheduler"), self.pipeline)
+        
+            # Apply LoRA (if configured)
+            self.apply_lora_to_pipeline(self.config_entry.get("lora"), self.pipeline)
+
+        except Exception as e:
+            raise RuntimeError(f"❌ Failed to load model {self.config_name}: {e}")
+
+        return self.final_pipeline
+    
     def get_parameters(self):
         """ Retrieves model-specific generation parameters from config. """
         return self.config_entry.get("parameters", {})

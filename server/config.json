@@ -2,9 +2,10 @@
     "sdxl-refiner": {
         "model_name": "stabilityai/stable-diffusion-xl-refiner-1.0",
         "pipeline_class": "StableDiffusionXLImg2ImgPipeline",
+        "final_pipeline_class": "StableDiffusionXLImg2ImgPipeline",
         "parameters": {
             "strength": 0.33,
-            "num_inference_steps": 45,
+            "num_inference_steps": 15,
             "guidance_scale": 10,
             "width": 1280,
             "height": 1024,
@@ -12,7 +13,7 @@
         },
         "bg_parameters": {
             "strength": 0.9,
-            "num_inference_steps": 30,
+            "num_inference_steps": 15,
             "guidance_scale": 7.5,
             "width": 1280,
             "height": 1024,
@@ -37,7 +38,7 @@
         },
         "seed.1": 1234589,
         "codeformer": {
-            "enabled": true,
+            "enabled": false,
             "weight": 0.7,
             "upscale": 1,
             "has_aligned": false,
