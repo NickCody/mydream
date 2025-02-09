@@ -47,11 +47,18 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     if mask is None:
         raise ValueError("Mask is required for inpainting mode.")
     
-    bg_mask = ImageOps.invert(mask)
-
     # Retrieve parameters from config
     params = config_loader.get_parameters()
     codeformer_config = config_loader.config_entry.get("codeformer", {})
+    
+    width=round_to_multiple(params.get("width", 640)),
+    height=round_to_multiple(params.get("height", 512)),
+    
+    # Standardize on generated size 
+    mask = mask.resize((width, height), Image.LANCZOS)
+    bg_mask = ImageOps.invert(mask)
+    input_image = input_image.resize((width, height), Image.LANCZOS)
+    
     print(f"🎭 Running inpainting for background with {prompt}, parameters: \n{params}")
     result = PIPELINE(
         prompt=prompt,
