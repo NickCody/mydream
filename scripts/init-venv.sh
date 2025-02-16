@@ -48,9 +48,7 @@ source "$VENV_PATH/bin/activate"
 #
 pip3 install --upgrade pip
 
-if [[ $DARWIN_FOUND -eq 0 ]]; then
-	pip install 'numpy<2' transformers diffusers["torch"] tf-keras==2.17.0 accelerate
-fi
+pip install "numpy<2"
 
 # Check if a unified requirements.txt exists
 REQUIREMENTS_FILE="$PROJECT_ROOT/requirements.txt"
@@ -61,12 +59,18 @@ if [ ! -f "$REQUIREMENTS_FILE" ]; then
 fi
 
 echo "Installing dependencies from $REQUIREMENTS_FILE ..."
-pip3 install -r "$REQUIREMENTS_FILE"
+pip3 install  -c constraints.txt -r "$REQUIREMENTS_FILE"
 if [ $? -ne 0 ]; then
   echo "Failed to install dependencies."
   deactivate
   exit 1
 fi
+
+if [[ $DARWIN_FOUND -eq 0 ]]; then
+	pip install -c constraints.txt transformers diffusers["torch"] tf-keras==2.17.0 accelerate
+	pip install -c constraints.txt torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
+fi
+
 
 echo "✅ PyTorch installation complete!"
 # Set PYTHONPATH to include both client and server
@@ -77,7 +81,7 @@ export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server:$PROJECT_ROOT/CodeF
 source $VENV_PATH/bin/activate
 echo "Installing CodeFormer dependencies ..."
 cd CodeFormer
-python3 ./basicsr/setup.py install
+#python3 ./basicsr/setup.py install
 
 echo "Virtual environment setup complete."
 echo "To activate it manually, run: source $VENV_PATH/bin/activate"
