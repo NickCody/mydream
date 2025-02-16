@@ -51,7 +51,7 @@
     "sd2-inpaint": {
         "model_name": "stabilityai/stable-diffusion-2-inpainting",
         "pipeline_class": "StableDiffusionInpaintPipeline",
-        "final_pipeline_class": "AutoPipelineForImage2Image",
+        "final_pipeline_class": "StableDiffusionImg2ImgPipeline",
         "parameters": {
             "strength": 0.33,
             "num_inference_steps": 15,
