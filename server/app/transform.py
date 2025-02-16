@@ -133,7 +133,7 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     final_params = config_loader.get_final_parameters()
     
     # resize composite_image to match final_params width/height
-    composite_input_image = composite_image.resize((final_params.get("width", processed_width), final_params.get("height", processed_height)), Image.LANCZOS).convert("RGB")
+    composite_image = composite_image.resize((final_params.get("width", processed_width), final_params.get("height", processed_height)), Image.LANCZOS).convert("RGB")
     
     if FINAL_PIPELINE is not None: 
         print(f"🎭 Final inpaint")
@@ -144,7 +144,7 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
             negative_prompt=final_params.get("negative_prompt", ""),
             guidance_scale=final_params.get("guidance_scale", 7.5),
             num_inference_steps=final_params.get("num_inference_steps", 20),
-            image=composite_input_image,
+            image=composite_image,
             strength=final_params.get("strength", 0.5)
         )
         final_image = result.images[0]
