@@ -133,7 +133,10 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     final_params = config_loader.get_final_parameters()
     
     # resize composite_image to match final_params width/height
-    composite_image = composite_image.resize((final_params.get("width", processed_width), final_params.get("height", processed_height)), Image.LANCZOS).convert("RGB")
+    composite_image = composite_image.resize((final_params.get("width", processed_width), final_params.get("height", processed_height)), Image.LANCZOS)
+    if composite_image.mode == "RGBA":
+        r, g, b, _ = composite_image.split()
+        composite_image = Image.merge("RGB", (r, g, b)) 
     
     if FINAL_PIPELINE is not None: 
         print(f"🎭 Final inpaint")
