@@ -42,6 +42,8 @@ torch
 torchvision
 torchaudio
 
+peft
+
 ###############################
 # macOS Dependencies
 ###############################

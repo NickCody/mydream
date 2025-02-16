@@ -231,8 +231,9 @@ class ModelConfigLoader:
 
             # Load LoRA weights into the pipeline's unet.
             use_safetensors = lora_file.endswith(".safetensors")
-            pipeline.unet.load_attn_procs(lora_file, use_safetensors=use_safetensors)
-
+            # pipeline.unet.load_attn_procs(lora_file, use_safetensors=use_safetensors)
+            pipeline.unet.load_lora_adapter(lora_file, use_safetensors=lora_file.endswith(".safetensors"))
+            
             # Apply alpha scaling if supported.
             if hasattr(pipeline.unet, "set_lora_scale"):
                 pipeline.unet.set_lora_scale(alpha)
