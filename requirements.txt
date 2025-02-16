@@ -36,7 +36,7 @@ lpips
 gdown # supports dVwnloading the large file from Google Drive
 
 # Constrain numpy to a version below 2 for all platforms
-#numpy<2
+numpy<2
 torch
 torchvision
 torchaudio
