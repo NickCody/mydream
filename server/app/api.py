@@ -89,7 +89,7 @@ async def process_image(
         save_image("B-background_img", background_img)
         save_image("C-composite", composite_img)
         save_image("D-final", output_img)
-        save_image("E-codeformer", output_img)
+        save_image("E-codeformer", codeformer_img)
 
         # STEP 5: Save the output image to disk for debugging
         global image_counter
