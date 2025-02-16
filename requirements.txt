@@ -61,5 +61,5 @@ tensorflow[and-cuda]; platform_system != "Darwin"
 # For PyTorch on Linux/Windows we use direct URL references to pick up the CUDA-enabled wheels.
 # (Make sure to update these URLs to match your desired versions and Python version.)
 torch; platform_system != "Darwin"
-torchvision platform_system != "Darwin"
-torchaudio platform_system != "Darwin"
+torchvision; platform_system != "Darwin"
+torchaudio; platform_system != "Darwin"
