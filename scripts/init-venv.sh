@@ -67,8 +67,6 @@ fi
 if [[ $DARWIN_FOUND -eq 1 ]]; then
     echo "✅ macOS detected. Installing Metal-enabled PyTorch..."
     pip3 install tensorflow tensorflow-macos tensorflow-metal torch torchvision torchaudio --upgrade --force-reinstall --upgrade --force-reinstall
-fi
-
 else
     echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."
     pip3 install tensorflow torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
