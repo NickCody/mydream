@@ -9,16 +9,12 @@ pillow
 protobuf
 python-multipart
 sentencepiece
-tensorflow-macos; platform_system == "Darwin"  # macOS TensorFlow
-tensorflow-metal; platform_system == "Darwin"  # macOS GPU acceleration
-tensorflow; platform_system == "Linux" or platform_system == "Windows"  # Standard TensorFlow for Linux & Windows
 transformers
 uvicorn
 tensorflow_datasets
 
 # Image and video processing
 opencv-python               # For video capture and image processing
-mediapipe
 Pillow
 
 # Networking & Utilities

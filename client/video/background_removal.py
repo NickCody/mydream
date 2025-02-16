@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import mediapipe as mp
 import torch
 import torchvision.transforms as T
 from PIL import Image
@@ -50,18 +49,6 @@ class GrabCutSegmentation:
 
         return result
     
-class MediaPipeSegmentation:
-    def __init__(self):
-        self.mp_selfie_segmentation = mp.solutions.selfie_segmentation
-        self.segmentation = self.mp_selfie_segmentation.SelfieSegmentation(model_selection=1)
-    
-    def process(self, image):
-        frame_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        results = self.segmentation.process(frame_rgb)
-        mask = results.segmentation_mask > 0.5
-        background = np.zeros_like(image)
-        return np.where(mask[:, :, None], image, background)
-
 class DeepLabV3Segmentation:
     def __init__(self, threshold=0.2, image_size=512, smooth_edges=True):
         """

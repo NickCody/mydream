@@ -56,11 +56,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+
 echo "🔹 OS-specific installations..."
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "✅ macOS detected. Installing Metal (MPS) PyTorch..."
     pip install torch torchvision torchaudio
+    pip install -r mac-requirements.txt
     pip install -r gui-requirements.txt
 else
     echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."

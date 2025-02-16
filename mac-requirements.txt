@@ -1,0 +1,3 @@
+# Server Requirements
+tensorflow-macos; platform_system == "Darwin"  # macOS TensorFlow
+tensorflow-metal; platform_system == "Darwin"  # macOS GPU acceleration
