@@ -135,9 +135,10 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     # resize composite_image to match final_params width/height
     composite_image = composite_image.resize((final_params.get("width", processed_width), final_params.get("height", processed_height)), Image.LANCZOS)
     if composite_image.mode == "RGBA":
-        print("Composite was RGBA, converting to RGB")
-        r, g, b, _ = composite_image.split()
-        composite_image = Image.merge("RGB", (r, g, b)) 
+        # Create a white background (or any solid color you prefer)
+        tmp_bg = Image.new("RGB", composite_image.size, (255, 255, 255))
+        # Composite the RGBA image onto the background; this removes transparency
+        composite_image = Image.alpha_composite(tmp_bg.convert("RGBA"), composite_image).convert("RGB")
     
     if FINAL_PIPELINE is not None: 
         print(f"🎭 Final inpaint")
