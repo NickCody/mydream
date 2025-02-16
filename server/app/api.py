@@ -85,10 +85,10 @@ async def process_image(
         )
 
         # Save the images with different monikers but the same index:
-        save_image("final", output_img)
-        save_image("composite", composite_img)
-        save_image("foreground_img", foreground_img)
-        save_image("background_img", background_img)
+        save_image("A-foreground_img", foreground_img)
+        save_image("B-background_img", background_img)
+        save_image("C-composite", composite_img)
+        save_image("D-final", output_img)
 
         # STEP 5: Save the output image to disk for debugging
         global image_counter
