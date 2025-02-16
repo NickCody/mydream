@@ -60,6 +60,6 @@ torchaudio; platform_system == "Darwin"
 tensorflow[and-cuda]; platform_system != "Darwin"
 # For PyTorch on Linux/Windows we use direct URL references to pick up the CUDA-enabled wheels.
 # (Make sure to update these URLs to match your desired versions and Python version.)
-torch @ https://download.pytorch.org/whl/cu124/torch-2.0.1%2Bcu124-cp311-cp311-linux_x86_64.whl; platform_system != "Darwin"
-torchvision @ https://download.pytorch.org/whl/cu124/torchvision-0.15.2%2Bcu124-cp311-cp311-linux_x86_64.whl; platform_system != "Darwin"
-torchaudio @ https://download.pytorch.org/whl/cu124/torchaudio-2.0.2%2Bcu124-cp311-cp311-linux_x86_64.whl; platform_system != "Darwin"
+torch; platform_system != "Darwin"
+torchvision platform_system != "Darwin"
+torchaudio platform_system != "Darwin"
