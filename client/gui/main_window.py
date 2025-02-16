@@ -10,10 +10,10 @@ from gui.image_sender import ImageSender
 from audio.audio_worker import AudioWorker
 from utils import resize_and_crop
 
-# DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, ultra-realistic portrait, high quality"""
-DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in star trek uniform, ultra-realistic portrait, high quality, photograph, photorealistic"""
+DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, ultra-realistic portrait, high quality, portrait photography, photorealistic"""
+# DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in star trek uniform, ultra-realistic portrait, high quality, photograph, photorealistic"""
 # DEFAULT_BG_PROMPT = r"""greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp"""
-DEFAULT_BG_PROMPT = r"""blurred starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
+DEFAULT_BG_PROMPT = r"""starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
 # --- Main Window (combines video feed, image sending, and audio transcription) ---
 class MainWindow(QtWidgets.QMainWindow):
     """
