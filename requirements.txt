@@ -42,6 +42,9 @@ tensorflow
 
 # Constrain numpy to a version below 2 for all platforms
 numpy<2
+torch
+torchvision
+torchaudio
 
 ###############################
 # macOS Dependencies
@@ -49,17 +52,3 @@ numpy<2
 # Use the macOS-specific TensorFlow and PyTorch packages (Metal-enabled)
 tensorflow-macos; platform_system == "Darwin"
 tensorflow-metal; platform_system == "Darwin"
-torch; platform_system == "Darwin"
-torchvision; platform_system == "Darwin"
-torchaudio; platform_system == "Darwin"
-
-###############################
-# Linux/Windows Dependencies
-###############################
-# Use the CUDA-enabled TensorFlow package (if it’s built that way)
-tensorflow[and-cuda]; platform_system != "Darwin"
-# For PyTorch on Linux/Windows we use direct URL references to pick up the CUDA-enabled wheels.
-# (Make sure to update these URLs to match your desired versions and Python version.)
-torch; platform_system != "Darwin"
-torchvision; platform_system != "Darwin"
-torchaudio; platform_system != "Darwin"
