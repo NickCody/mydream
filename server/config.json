@@ -2,6 +2,7 @@
     "sdxl-refiner": {
         "model_name": "stabilityai/stable-diffusion-xl-refiner-1.0",
         "pipeline_class": "StableDiffusionXLImg2ImgPipeline",
+        "final_model_name": "stabilityai/stable-diffusion-xl-base-1.0",
         "final_pipeline_class": "StableDiffusionXLImg2ImgPipeline",
         "parameters": {
             "strength": 0.33,
@@ -51,6 +52,7 @@
     "sd2-inpaint": {
         "model_name": "stabilityai/stable-diffusion-2-inpainting",
         "pipeline_class": "StableDiffusionInpaintPipeline",
+        "final_model_name": "stabilityai/stable-diffusion-2-1",
         "final_pipeline_class": "StableDiffusionImg2ImgPipeline",
         "parameters": {
             "strength": 0.33,

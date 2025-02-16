@@ -121,6 +121,7 @@ class ModelConfigLoader:
             raise ValueError(f"❌ Model '{self.config_name}' not found in config.")
 
         self.model_name = self.config_entry["model_name"]
+        self.final_model_name = self.config_entry["final_model_name"]
         self.pipeline_class = self.config_entry.get("pipeline_class", "StableDiffusionImg2ImgPipeline")
         self.final_pipeline_class = self.config_entry.get("final_pipeline_class", "StableDiffusionImg2ImgPipeline")
         self.pipeline = None
@@ -361,7 +362,7 @@ class ModelConfigLoader:
 
             # 🔹 Load the pipeline
             self.final_pipeline = PipelineClass.from_pretrained(
-                self.model_name,
+                self.final_model_name,
                 cache_dir=HF_CACHE,
                 token=HF_TOKEN,
                 torch_dtype=torch_dtype,  # Uses None if unspecified
