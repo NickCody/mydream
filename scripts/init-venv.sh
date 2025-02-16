@@ -70,7 +70,7 @@ if [[ $DARWIN_FOUND -eq 1 ]]; then
 else
     echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-    pip install tensorflow==2.15
+    pip install tensorflow
 fi
 
 
