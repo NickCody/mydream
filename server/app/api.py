@@ -6,6 +6,7 @@ import traceback
 import numpy as np
 from app.transform import transform_image  # Your img2img/inpainting pipeline
 from datetime import datetime
+import os
 
 app = FastAPI()
 
@@ -22,6 +23,11 @@ def save_image(moniker, image):
       rumple_20250216-210957_final_10.png
     """
     global image_counter, img_prefix
+    
+    # mkdir temp if not exists
+    if not os.path.exists("temp"):
+        os.makedirs("temp")
+        
     filename = f"temp/rumple_{img_prefix}_{moniker}_{image_counter:d}.png"
     image.save(filename, format="PNG")
     print(f"Saved processed image as {filename}")
@@ -83,14 +89,15 @@ async def process_image(
         save_image("foreground_img", foreground_img)
         save_image("background_img", background_img)
 
-        # STEP 5: Save the output image as PNG (to preserve transparency)
+        # STEP 5: Save the output image to disk for debugging
+        global image_counter
+        image_counter += 1
+        
+        # STEP 6: Save the output image as PNG (to preserve transparency)
         buffer = io.BytesIO()
         output_img.save(buffer, format="PNG")
         buffer.seek(0)
 
-        # STEP 6: Save the output image to disk for debugging
-        global image_counter
-        image_counter += 1
         
         # STEP 7: Return the processed image
         return Response(content=buffer.getvalue(), media_type="image/png")
