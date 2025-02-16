@@ -126,11 +126,15 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
 
     print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
     composite_image = Image.composite(foreground_image, background_image, mask)
-  
+ 
+    #
+    # Final Render (before Codeformer)
+    #
+    final_params = config_loader.get_final_parameters()
+    
     # resize composite_image to match final_params width/height
     composite_input_image = input_image.resize((final_params.get("width", processed_width), final_params.get("height", processed_height)), Image.LANCZOS)
     
-    final_params = config_loader.get_final_parameters()
     if FINAL_PIPELINE is not None: 
         print(f"🎭 Final inpaint")
         result = FINAL_PIPELINE(
