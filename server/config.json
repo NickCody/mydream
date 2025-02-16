@@ -29,7 +29,7 @@
             "type": "DPM"
         },
         "torch_dtype": "float16",
-        "lora.1": {
+        "lora": {
             "model_path": "/Volumes/Dragan/HuggingFace/civitai/sdxl1.0_realastic_female_lora.safetensors",
             "alpha": 0.5
         },
@@ -37,7 +37,7 @@
             "model_path": "/Volumes/Dragan/HuggingFace/civitai/Zendaya.safetensors",
             "alpha": 1.4
         },
-        "lora": {
+        "lora.3": {
             "model_path": "strangerzonehf/Flux-Super-Realism-LoRA/super-realism.safetensors",
             "alpha": 0.8
         },
