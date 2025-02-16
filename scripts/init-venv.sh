@@ -48,6 +48,10 @@ source "$VENV_PATH/bin/activate"
 #
 pip3 install --upgrade pip
 
+if [[ $DARWIN_FOUND -eq 0 ]]; then
+	pip install transformers diffusers["torch"] tf-keras==2.17.0 accelerate
+fi
+
 # Check if a unified requirements.txt exists
 REQUIREMENTS_FILE="$PROJECT_ROOT/requirements.txt"
 if [ ! -f "$REQUIREMENTS_FILE" ]; then
