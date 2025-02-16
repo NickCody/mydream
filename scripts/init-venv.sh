@@ -7,11 +7,14 @@ IFS=$'\n\t'
 # 1. Install Python 3.12.8 using pyenv.
 # 2. Install portaudio using Homebrew.
 
+uSTYPE="$(uname)"
+
 # MacOS
 if [ "$(uname)" == "Darwin" ]; then
   export CPATH="$(brew --prefix portaudio)/include"
   export LIBRARY_PATH="$(brew --prefix portaudio)/lib"
 fi
+
 
 # Set project root directory (assumed to be the script's location)
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -48,6 +51,10 @@ if [ ! -f "$REQUIREMENTS_FILE" ]; then
   exit 1
 fi
 
+#
+# Install required packages
+#
+
 echo "Installing dependencies from $REQUIREMENTS_FILE ..."
 pip3 install -r "$REQUIREMENTS_FILE"
 if [ $? -ne 0 ]; then
@@ -56,18 +63,18 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-
-echo "🔹 OS-specific installations..."
-
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "✅ macOS detected. Installing Metal (MPS) PyTorch..."
-    pip install torch torchvision torchaudio
-    pip install -r mac-requirements.txt
-    pip install -r gui-requirements.txt
+    echo "✅ macOS detected. Installing Metal-enabled PyTorch..."
+    pip install tensorflow-macos tensorflow-metal torch torchvision torchaudio
+
 else
     echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
 fi
+
+
+# echo "🔹 OS-specific installations..."
+
 
 echo "✅ PyTorch installation complete!"
 # Set PYTHONPATH to include both client and server

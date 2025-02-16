@@ -11,7 +11,6 @@ python-multipart
 sentencepiece
 transformers
 uvicorn
-tensorflow_datasets
 
 # Image and video processing
 opencv-python               # For video capture and image processing
@@ -39,3 +38,6 @@ tqdm
 yapf
 lpips
 gdown # supports dVwnloading the large file from Google Drive
+
+
+tensorflow

@@ -17,7 +17,9 @@ img_prefix = datetime.now().strftime("%Y%m%d-%H%M%S")
 async def process_image(
     image: UploadFile = File(...),  # Expect an image file upload
     prompt: str = Form(...),  
-    bg_prompt: str = Form(...)
+    bg_prompt: str = Form(...),
+    processed_width: int = Form(...),
+    processed_height: int = Form(...)
 ):
     """
     Endpoint to process an input image with a given prompt.
@@ -59,7 +61,7 @@ async def process_image(
             return
         
         # STEP 4: Process the image using AI inpainting
-        output_image = transform_image(input_image, prompt, bg_prompt, mask=mask)
+        output_image = transform_image(input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask)
 
         # STEP 5: Save the output image as PNG (to preserve transparency)
         buffer = io.BytesIO()

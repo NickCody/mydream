@@ -61,7 +61,7 @@ def apply_gaussian_blur(image: Image.Image, ksize=15, sigma=0):
     # Convert back to PIL image
     return Image.fromarray(blurred_rgb)
 
-def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask: Image.Image = None) -> Image.Image:
+def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, processed_width: int, processed_height: int, mask: Image.Image = None) -> Image.Image:
     """
     Transforms the input image based on the provided prompt.
     Supports inpainting if a mask is provided and applies CodeFormer if enabled.
@@ -78,7 +78,7 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     params = config_loader.get_parameters()
     codeformer_config = config_loader.config_entry.get("codeformer", {})
    
-    standard_size = (round_to_multiple(params.get("width", 640)), round_to_multiple(params.get("height", 512)))
+    standard_size = (processed_width, processed_height)
     
     # Standardize on generated size 
     mask = mask.resize(standard_size, Image.LANCZOS)
@@ -88,8 +88,8 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     print(f"🎭 Running inpainting for background with {prompt}, parameters: \n{params}")
     result = PIPELINE(
         prompt=prompt,
-        width=round_to_multiple(params.get("width", 640)),
-        height=round_to_multiple(params.get("height", 512)),
+        width=processed_width,
+        height=processed_height,
         negative_prompt=params.get("negative_prompt", ""),
         guidance_scale=params.get("guidance_scale", 4),
         num_inference_steps=params.get("num_inference_steps", 20),
@@ -106,8 +106,8 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
     print(f"🎭 Running inpainting for background with {bg_prompt}, parameters: \n{bg_params}")
     result = PIPELINE(
         prompt=bg_prompt,
-        width=round_to_multiple(bg_params.get("width", 640)),
-        height=round_to_multiple(bg_params.get("height", 512)),
+        width=processed_width,
+        height=processed_height,
         negative_prompt=bg_params.get("negative_prompt", ""),
         guidance_scale=bg_params.get("guidance_scale", 4),
         num_inference_steps=bg_params.get("num_inference_steps", 20),
@@ -132,8 +132,8 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, mask:
         print(f"🎭 Final inpaint")
         result = FINAL_PIPELINE(
             prompt=prompt + "," + bg_prompt,
-            width=round_to_multiple(params.get("width", 640)),
-            height=round_to_multiple(params.get("height", 512)),
+            width=processed_width,
+            height=processed_height,
             negative_prompt=params.get("negative_prompt", ""),
             guidance_scale=params.get("guidance_scale", 4),
             num_inference_steps=params.get("num_inference_steps", 20),

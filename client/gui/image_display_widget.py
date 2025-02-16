@@ -11,9 +11,6 @@ class ImageDisplayWidget(QtWidgets.QGraphicsView):
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
     def set_image(self, image: QtGui.QImage):
-        # Print image size
-        print("Original Image size:", image.size())
-
         # Clear any existing pixmap
         self.scene().clear()
 

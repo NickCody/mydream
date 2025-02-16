@@ -8,9 +8,10 @@ from video.video_widget import VideoWidget
 from gui.image_display_widget import ImageDisplayWidget
 from gui.image_sender import ImageSender
 from audio.audio_worker import AudioWorker
+from utils import resize_and_crop
 
 # DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, ultra-realistic portrait, high quality"""
-DEFAULT_PROMPT = r"""Young (handsome) [pedro pascal|antonio banderas], dressed in star trek uniform, ultra-realistic portrait, high quality, photograph, photorealistic"""
+DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in star trek uniform, ultra-realistic portrait, high quality, photograph, photorealistic"""
 # DEFAULT_BG_PROMPT = r"""greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp"""
 DEFAULT_BG_PROMPT = r"""blurred starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
 # --- Main Window (combines video feed, image sending, and audio transcription) ---
@@ -26,10 +27,12 @@ class MainWindow(QtWidgets.QMainWindow):
         On server error, the system waits 2 seconds before retrying.
       - Audio transcription updates the prompt textbox as the user speaks.
     """
-    def __init__(self, server_url):
+    def __init__(self, args):
         super(MainWindow, self).__init__()
         self.setWindowTitle("Rumple My Dream")
-        self.server_url = server_url  # Store the server URL in an instance variable
+        self.server_url = args.server_url  # Store the server URL in an instance variable
+        self.processed_height = args.height
+        self.processed_width = args.width
         self.resize(1280, 1024)
         self.sender_thread = None
         self.audio_worker = None  # Only controls audio recording.
@@ -152,42 +155,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.voice_text_box.setPlainText(text)
     
-    @staticmethod    
-    def resize_and_crop(frame, target_width=640, target_height=512):
-        """
-        Resizes an image to fit the given target height while keeping the aspect ratio,
-        then crops the width to exactly `target_width` (centered).
-
-        Parameters:
-        - frame (numpy.ndarray): Input image.
-        - target_width (int): Desired output width after cropping (default: 640).
-        - target_height (int): Desired output height after resizing (default: 512).
-
-        Returns:
-        - Cropped and resized image (numpy.ndarray).
-        """
-
-        # Step 1: Get original dimensions
-        orig_height, orig_width = frame.shape[:2]
-
-        # Step 2: Compute new width while keeping aspect ratio
-        new_width = int((target_height / orig_height) * orig_width)
-
-        # Step 3: Resize the image while keeping aspect ratio
-        frame_resized = cv2.resize(frame, (new_width, target_height), interpolation=cv2.INTER_AREA)
-
-        # Step 4: Crop left/right to get exactly target_width
-        crop_x_start = max(0, (new_width - target_width) // 2)  # Center cropping
-        crop_x_end = crop_x_start + target_width
-
-        # Ensure we don't crop beyond image bounds
-        if crop_x_end > new_width:
-            crop_x_end = new_width
-            crop_x_start = crop_x_end - target_width
-
-        frame_cropped = frame_resized[:, crop_x_start:crop_x_end]
-
-        return frame_cropped    
 
     def process_next_frame(self):
         """
@@ -197,7 +164,6 @@ class MainWindow(QtWidgets.QMainWindow):
           - On successful response, display the image for 5 seconds.
           - On server error, wait 2 seconds before retrying.
         """
-        print("process_next_frame called")
         if self.request_in_progress:
             QtCore.QTimer.singleShot(100, self.process_next_frame)
             return
@@ -209,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         
         # resize frame to 640x512 maintain aspect ratio and crop left/right
-        frame = self.resize_and_crop(frame, 1280, 1024)
+        frame = resize_and_crop(frame, 1280, 1024)
         
         # Setup prompts
         self.request_in_progress = True
@@ -220,14 +186,13 @@ class MainWindow(QtWidgets.QMainWindow):
         prompt = f"{voice_prompt}, {self.static_text_box.toPlainText().strip()}"
         bg_prompt = DEFAULT_BG_PROMPT
                 
-        self.sender_thread = ImageSender(frame, prompt, bg_prompt, self.server_url)
+        self.sender_thread = ImageSender(frame, prompt, bg_prompt, self.processed_width, self.processed_height, self.server_url)
         self.sender_thread.finished_signal.connect(self.handle_server_response)
         self.sender_thread.error_signal.connect(self.handle_server_error)
         self.sender_thread.start()
    
     def handle_server_response(self, image_bytes):
-        """Display the processed image for 5 seconds, then resume frame processing."""
-        print("handle_server_response called")
+        
         # Convert the received bytes to a QImage.
         processed_image = QtGui.QImage.fromData(image_bytes)
         if processed_image.isNull():
@@ -235,13 +200,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.request_in_progress = False
             QtCore.QTimer.singleShot(2000, self.process_next_frame)
             return
+        
+        print(f"Server responded with image of size {processed_image.size()}")
 
-        # Instead of manually scaling and setting a pixmap,
-        # we delegate the display to our new ImageDisplayWidget control.
         self.processed_label.set_image(processed_image)
 
         self.request_in_progress = False
-        # Display the processed image for 5 seconds before capturing the next frame.
+       
         QtCore.QTimer.singleShot(0, self.process_next_frame) 
     
     def handle_server_error(self, error_msg):

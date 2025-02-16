@@ -19,7 +19,9 @@ class VideoWidget(QtWidgets.QLabel):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(33)  # roughly 30 FPS
         # Initialize background remover (Change to desired method)
+        # self.bg_remover = bg_removal.MaskRCNNSegmentation(threshold=0.8)
         self.bg_remover = bg_removal.DeepLabV3Segmentation()
+        
     
     @staticmethod    
     def blend_background(frame, color=(255, 0, 0), alpha=0.5):

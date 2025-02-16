@@ -3,5 +3,4 @@ PyAudio
 vosk
 # GUI
 PyQt5                       # GI
-tensorflow-metal; platform_system == "Darwin"  # For macOS
 
