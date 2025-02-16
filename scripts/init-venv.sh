@@ -64,19 +64,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-if [[ $DARWIN_FOUND -eq 1 ]]; then
-    echo "✅ macOS detected. Installing Metal-enabled PyTorch..."
-    pip3 install tensorflow-macos tensorflow-metal torch torchvision torchaudio --upgrade --force-reinstall --upgrade --force-reinstall
-else
-    echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."
-    pip install 'tensorflow[and-cuda]'
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-fi
-
-
-# echo "🔹 OS-specific installations..."
-
-
 echo "✅ PyTorch installation complete!"
 # Set PYTHONPATH to include both client and server
 echo "Setting PYTHONPATH for both client/ and server/..."
