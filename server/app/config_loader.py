@@ -38,9 +38,7 @@ from diffusers import (
 from diffusers import DPMSolverMultistepScheduler,EulerAncestralDiscreteScheduler
 from transformers import AutoTokenizer
 from huggingface_hub import hf_hub_download
-from safetensors.torch import load_file
 import os
-from safetensors.torch import load_file
 from app.codeformer_api import load_codeformer
 
 # Use Hugging Face Diffusers pipelines
@@ -220,24 +218,29 @@ class ModelConfigLoader:
                 print("⚠️ Warning: LoRA model path is missing in config.")
                 return
 
-            # Determine if LoRA is from Hugging Face or local
-            if os.path.exists(lora_path):  # ✅ Local path detected
+            # Determine if LoRA is a local file or a Hugging Face repo id.
+            # Check if lora_path is an absolute path and exists locally.
+            if os.path.isabs(lora_path) and os.path.exists(lora_path):
                 lora_file = lora_path
                 print(f"📂 Loading local LoRA: {lora_file}")
-            else:  # ✅ Hugging Face path detected
+            else:
                 print(f"📥 Downloading LoRA from Hugging Face: {lora_path}")
-                lora_file = hf_hub_download(lora_path, filename=os.path.basename(lora_path))
+                # Here, lora_path is assumed to be the repo id (e.g., "namespace/repo_name")
+                # and the file is the basename of lora_path.
+                lora_file = hf_hub_download(repo_id=lora_path, filename=os.path.basename(lora_path))
 
-            # Load LoRA weights
-            pipeline.unet.load_attn_procs(lora_file, use_safetensors=lora_file.endswith(".safetensors"))
+            # Load LoRA weights into the pipeline's unet.
+            use_safetensors = lora_file.endswith(".safetensors")
+            pipeline.unet.load_attn_procs(lora_file, use_safetensors=use_safetensors)
 
-            # Apply alpha scaling if supported
+            # Apply alpha scaling if supported.
             if hasattr(pipeline.unet, "set_lora_scale"):
                 pipeline.unet.set_lora_scale(alpha)
                 print(f"✅ LoRA alpha set to {alpha}")
 
-            pipeline.set_attn_processor("lora")  # Ensure LoRA is active
-            pipeline.fuse_lora()  # Merge LoRA weights into model
+            # Ensure LoRA is active and merge its weights.
+            pipeline.set_attn_processor("lora")
+            pipeline.fuse_lora()
 
             print("✅ LoRA successfully applied!")
 
