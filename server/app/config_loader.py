@@ -386,4 +386,8 @@ class ModelConfigLoader:
     
     def get_bg_parameters(self):
         """ Retrieves model-specific background generation parameters from config. """
-        return self.config_entry.get("bg_parameters", self.get_parameters())
+        return self.config_entry.get("bg_parameters", {})
+    
+    def get_final_parameters(self):
+        """ Retrieves final composite parameters """
+        return self.config_entry.get("final_parameters", {})

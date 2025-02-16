@@ -128,17 +128,18 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
     composite_image = Image.composite(foreground_image, background_image, mask)
    
+    final_params = config_loader.get_final_parameters()
     if FINAL_PIPELINE is not None: 
         print(f"🎭 Final inpaint")
         result = FINAL_PIPELINE(
             prompt=prompt + "," + bg_prompt,
-            width=processed_width,
-            height=processed_height,
-            negative_prompt=params.get("negative_prompt", ""),
-            guidance_scale=params.get("guidance_scale", 4),
-            num_inference_steps=params.get("num_inference_steps", 20),
+            width=final_params.get("width", processed_width),
+            height=final_params.get("height", processed_height),
+            negative_prompt=final_params.get("negative_prompt", ""),
+            guidance_scale=final_params.get("guidance_scale", 7.5),
+            num_inference_steps=final_params.get("num_inference_steps", 20),
             image=composite_image,
-            strength=params.get("strength", 0.2)
+            strength=final_params.get("strength", 0.5)
         )
         final_image = result.images[0]
     else:

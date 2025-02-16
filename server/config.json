@@ -16,6 +16,14 @@
             "negative_prompt": "people, multiple people, bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy",
             "blur": 15
         },
+        "final_parameters": {
+            "strength": 0.5,
+            "num_inference_steps": 50,
+            "width":1280,
+            "height":1024,
+            "guidance_scale": 7.5,
+            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy",
+        },
         "scheduler": {
             "type": "DPM"
         },
