@@ -76,7 +76,6 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     
     # Retrieve parameters from config
     params = config_loader.get_parameters()
-    codeformer_config = config_loader.config_entry.get("codeformer", {})
    
     standard_size = (processed_width, processed_height)
     
@@ -127,7 +126,10 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
 
     print(f"Mask image: {type(mask)}: {mask.size[0]}x{mask.size[1]}")
     composite_image = Image.composite(foreground_image, background_image, mask)
-   
+  
+    # resize composite_image to match final_params width/height
+    composite_input_image = input_image.resize((final_params.get("width", processed_width), final_params.get("height", processed_height)), Image.LANCZOS)
+    
     final_params = config_loader.get_final_parameters()
     if FINAL_PIPELINE is not None: 
         print(f"🎭 Final inpaint")
@@ -138,17 +140,29 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
             negative_prompt=final_params.get("negative_prompt", ""),
             guidance_scale=final_params.get("guidance_scale", 7.5),
             num_inference_steps=final_params.get("num_inference_steps", 20),
-            image=composite_image,
+            image=composite_input_image,
             strength=final_params.get("strength", 0.5)
         )
         final_image = result.images[0]
     else:
         final_image = composite_image;
     
+    codeformer_config = config_loader.config_entry.get("codeformer", {})
+    codeformer_image = enhance_faces(
+        config_loader.device,
+        final_image,
+        enabled=codeformer_config.get("enabled", False),
+        weight=codeformer_config.get("weight", 0.7),
+        upscale=codeformer_config.get("upscale", 1),
+        has_aligned=codeformer_config.get("has_aligned", False),
+        paste_back=codeformer_config.get("paste_back", True)
+    )
+ 
     # ✅ Print generated image details after CodeFormer processing
     print("\n📸 Output Image Details (After CodeFormer Enhancement):")
-    print(f"Final Image Size: {final_image.size[0]}x{final_image.size[1]}")
-    np_image = np.array(final_image)
-    print(f"Image Stats - Min: {np_image.min()}, Max: {np_image.max()}, Mean: {np_image.mean()}")
+    
+    # print(f"Final Image Size: {final_image.size[0]}x{final_image.size[1]}")
+    # np_image = np.array(final_image)
+    # print(f"Image Stats - Min: {np_image.min()}, Max: {np_image.max()}, Mean: {np_image.mean()}")
 
-    return [final_image, composite_image, foreground_image, background_image]
+    return [final_image, codeformer_image, composite_image, foreground_image, background_image]

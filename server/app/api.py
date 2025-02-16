@@ -80,7 +80,7 @@ async def process_image(
             return
         
         # STEP 4: Process the image using AI inpainting
-        [output_img, composite_img, foreground_img, background_img] = transform_image(
+        [output_img, codeformer_img, composite_img, foreground_img, background_img] = transform_image(
             input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask
         )
 
@@ -89,6 +89,7 @@ async def process_image(
         save_image("B-background_img", background_img)
         save_image("C-composite", composite_img)
         save_image("D-final", output_img)
+        save_image("E-codeformer", output_img)
 
         # STEP 5: Save the output image to disk for debugging
         global image_counter

@@ -43,6 +43,7 @@ def enhance_faces(
     paste_back=True
 ):
     if not enabled or codeformer_model is None:
+        print("⚠️ CodeFormer enhancement disabled or model not loaded, returning original image.")
         return image
 
     # Convert image to OpenCV format
