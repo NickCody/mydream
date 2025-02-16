@@ -30,6 +30,10 @@
         },
         "torch_dtype": "float16",
         "lora": {
+            "model_path": "/home/ubuntu/HuggingFace/sdxl1.0_realastic_female_lora.safetensors",
+            "alpha": 0.5
+        },
+        "lora.1": {
             "model_path": "/Volumes/Dragan/HuggingFace/civitai/sdxl1.0_realastic_female_lora.safetensors",
             "alpha": 0.5
         },
