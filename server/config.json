@@ -62,7 +62,7 @@
             "strength": 0.9,
             "num_inference_steps": 15,
             "guidance_scale": 7.5,
-            "negative_prompt": "people, multiple people, bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy",
+            "negative_prompt": "people, multiple people, bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy"
         },
         "final_parameters": {
             "strength": 0.5,
