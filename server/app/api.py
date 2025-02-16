@@ -80,12 +80,13 @@ async def process_image(
             return
         
         # STEP 4: Process the image using AI inpainting
-        [output_img, foreground_img, background_img] = transform_image(
+        [output_img, composite_img, foreground_img, background_img] = transform_image(
             input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask
         )
 
         # Save the images with different monikers but the same index:
         save_image("final", output_img)
+        save_image("composite", composite_img)
         save_image("foreground_img", foreground_img)
         save_image("background_img", background_img)
 

@@ -150,4 +150,4 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     np_image = np.array(final_image)
     print(f"Image Stats - Min: {np_image.min()}, Max: {np_image.max()}, Mean: {np_image.mean()}")
 
-    return final_image 
+    return [final_image, composite_image, foreground_image, background_image]
