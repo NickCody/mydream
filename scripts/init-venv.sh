@@ -3,44 +3,49 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Make sure you do these two things first:
-# 1. Install Python 3.12.8 using pyenv.
-# 2. Install portaudio using Homebrew.
+if [[ "$OSTYPE" =~ [dD]arwin(64)? ]]; then
+    DARWIN_FOUND=1
+else
+    DARWIN_FOUND=0
+fi
 
-uSTYPE="$(uname)"
 
-# MacOS
-if [ "$(uname)" == "Darwin" ]; then
+if [[ $DARWIN_FOUND -eq 1 ]]; then
   export CPATH="$(brew --prefix portaudio)/include"
   export LIBRARY_PATH="$(brew --prefix portaudio)/lib"
 fi
 
-
+#
 # Set project root directory (assumed to be the script's location)
+#
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-# Use the environment variable PYTHON_BIN if set, otherwise default to /Users/nic/.pyenv/versions/3.12.8/bin/python3
-PYTHON_BIN=${PYTHON_BIN:-/Users/nic/.pyenv/versions/3.12.8/bin/python3}
-
-echo "Using Python interpreter: $PYTHON_BIN"
+echo "Using Python interpreter: $(which python3)"
 
 # Create the virtual environment in the project root
 VENV_PATH="$PROJECT_ROOT/.venv"
 
+#
+# Create Virtual Environment
+#
 echo "Creating virtual environment in $VENV_PATH ..."
 if [ -d "$VENV_PATH" ]; then
   rm -rf "$VENV_PATH"
 fi
-"$PYTHON_BIN" -m venv "$VENV_PATH"
+python3 -m venv "$VENV_PATH"
 if [ $? -ne 0 ]; then
   echo "Failed to create virtual environment."
   exit 1
 fi
 
+#
 # Activate the virtual environment
+#
 echo "Activating virtual environment ..."
 source "$VENV_PATH/bin/activate"
 
+#
+# Requirements
+#
 pip3 install --upgrade pip
 
 # Check if a unified requirements.txt exists
@@ -51,10 +56,6 @@ if [ ! -f "$REQUIREMENTS_FILE" ]; then
   exit 1
 fi
 
-#
-# Install required packages
-#
-
 echo "Installing dependencies from $REQUIREMENTS_FILE ..."
 pip3 install -r "$REQUIREMENTS_FILE"
 if [ $? -ne 0 ]; then
@@ -63,13 +64,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
+if [[ $DARWIN_FOUND -eq 1 ]]; then
     echo "✅ macOS detected. Installing Metal-enabled PyTorch..."
-    pip install tensorflow-macos tensorflow-metal torch torchvision torchaudio
+    pip3 install tensorflow tensorflow-macos tensorflow-metal torch torchvision torchaudio --upgrade --force-reinstall --upgrade --force-reinstall
+fi
 
 else
     echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
+    pip3 install tensorflow torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
 fi
 
 
@@ -85,7 +87,7 @@ export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server:$PROJECT_ROOT/CodeF
 source $VENV_PATH/bin/activate
 echo "Installing CodeFormer dependencies ..."
 cd CodeFormer
-python ./basicsr/setup.py install
+python3 ./basicsr/setup.py install
 
 echo "Virtual environment setup complete."
 echo "To activate it manually, run: source $VENV_PATH/bin/activate"
