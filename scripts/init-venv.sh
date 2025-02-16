@@ -69,8 +69,8 @@ if [[ $DARWIN_FOUND -eq 1 ]]; then
     pip3 install tensorflow tensorflow-macos tensorflow-metal torch torchvision torchaudio --upgrade --force-reinstall --upgrade --force-reinstall
 else
     echo "✅ Linux/Windows detected. Installing CUDA-enabled PyTorch..."
-    pip install tensorflow==2.15
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+    pip install tensorflow==2.15
 fi
 
 
