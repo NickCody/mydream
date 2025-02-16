@@ -94,7 +94,7 @@ class GrabCutSegmentation(BaseSegmentation):
 # 4. DeepLabV3Segmentation
 # -------------------------------
 class DeepLabV3Segmentation(BaseSegmentation):
-    def __init__(self, threshold=0.4, image_size=512, smooth_edges=True):
+    def __init__(self, threshold=0.2, image_size=512, smooth_edges=True):
         super().__init__(smooth_edges)
         self.device = get_device()
         self.model = deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1)

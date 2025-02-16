@@ -13,6 +13,19 @@ app = FastAPI()
 image_counter = 1
 img_prefix = datetime.now().strftime("%Y%m%d-%H%M%S")
 
+def save_image(moniker, image):
+    """
+    Saves a PIL image to disk with a given moniker. The filename format is:
+      temp/rumple_<img_prefix>_<moniker>_<image_counter>.png
+
+    For example:
+      rumple_20250216-210957_final_10.png
+    """
+    global image_counter, img_prefix
+    filename = f"temp/rumple_{img_prefix}_{moniker}_{image_counter:d}.png"
+    image.save(filename, format="PNG")
+    print(f"Saved processed image as {filename}")
+    
 @app.post("/api/process")
 async def process_image(
     image: UploadFile = File(...),  # Expect an image file upload
@@ -61,18 +74,22 @@ async def process_image(
             return
         
         # STEP 4: Process the image using AI inpainting
-        output_image = transform_image(input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask)
+        [output_img, foreground_img, background_img] = transform_image(
+            input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask
+        )
+
+        # Save the images with different monikers but the same index:
+        save_image("final", output_img)
+        save_image("foreground_img", foreground_img)
+        save_image("background_img", background_img)
 
         # STEP 5: Save the output image as PNG (to preserve transparency)
         buffer = io.BytesIO()
-        output_image.save(buffer, format="PNG")
+        output_img.save(buffer, format="PNG")
         buffer.seek(0)
 
         # STEP 6: Save the output image to disk for debugging
         global image_counter
-        filename = f"temp/rumple_{img_prefix}_{image_counter:d}.png"
-        output_image.save(filename, format="PNG")
-        print(f"Saved processed image as {filename}")
         image_counter += 1
         
         # STEP 7: Return the processed image

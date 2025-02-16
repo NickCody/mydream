@@ -66,7 +66,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-if [[ $DARWIN_FOUND -eq 0 ]]; then
+if [[ $DARWIN_FOUND -eq 1 ]]; then
+    pip install -c constraints.txt -r gui-requirements.txt
+else
 	pip install -c constraints.txt transformers diffusers["torch"] tf-keras==2.17.0 accelerate
 	pip install -c constraints.txt torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
 fi
