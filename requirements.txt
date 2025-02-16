@@ -39,3 +39,4 @@ yapf
 lpips
 gdown # supports dVwnloading the large file from Google Drive
 
+tensorflow
