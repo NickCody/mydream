@@ -28,7 +28,7 @@ def save_image(moniker, image):
     if not os.path.exists("temp"):
         os.makedirs("temp")
         
-    filename = f"temp/rumple_{img_prefix}_{moniker}_{image_counter:d}.png"
+    filename = f"temp/rumple_{img_prefix}_{image_counter:d}_{moniker}_.png"
     image.save(filename, format="PNG")
     print(f"Saved processed image as {filename}")
     
