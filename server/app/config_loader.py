@@ -247,6 +247,7 @@ class ModelConfigLoader:
     def initialize_pipeline(self):
         global pipeline_mapping
         
+        print("INPAINT PIPELINE")
         print(f"🚀 Loading model: {self.config_name} ({self.model_name})")
         print(f"📂 Cache directory: {HF_CACHE}")
         print(f"🔄 Using pipeline: {self.pipeline_class}")
@@ -264,12 +265,6 @@ class ModelConfigLoader:
         # # 🔹 Ensure generator is passed into pipeline calls
         # self.generator = generator
 
-        # ✅ Load CodeFormer if enabled in config
-        codeformer_config = self.config_entry.get("codeformer", {})
-        if codeformer_config.get("enabled", True):
-            print("🔹 Initializing CodeFormer for face enhancement...")
-            load_codeformer(self.device)
-            
         try:
             # 🔹 Select appropriate pipeline
             if self.pipeline_class == "StableDiffusion3ImageToImage":
@@ -322,7 +317,8 @@ class ModelConfigLoader:
             print("⚠️ No final pipeline class specified. Using default pipeline only.")
             return None
         
-        print(f"🚀 Loading model: {self.config_name} ({self.model_name})")
+        print("FINAL PIPELINE")
+        print(f"🚀 Loading model: {self.config_name} ({self.final_model_name})")
         print(f"📂 Cache directory: {HF_CACHE}")
         print(f"🔄 Using pipeline: {self.final_pipeline_class}")
 
