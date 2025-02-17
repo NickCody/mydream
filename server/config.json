@@ -66,7 +66,8 @@
         },
         "torch_dtype": "float16",
         "lora": {
-            "model_path": "nickyballs-last-f16.safetensors",
+            "model_path.": "nickyballs-last-f16.safetensors",
+            "model_path": "nickyballs-epoch-000010-16.safetensors",
             "alpha": 0.9
         }
     },
