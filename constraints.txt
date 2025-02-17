@@ -1,1 +1,2 @@
 numpy<2
+ml-dtypes~=0.3.1

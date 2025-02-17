@@ -43,6 +43,7 @@ torchvision
 torchaudio
 
 peft
+jax
 
 ###############################
 # macOS Dependencies
