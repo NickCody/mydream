@@ -9,13 +9,13 @@
             "strength": 0.33,
             "num_inference_steps": 15,
             "guidance_scale": 10,
-            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy, illustration, cartoom, anime"
+            "negative_prompt": ""
         },
         "bg_parameters": {
             "strength": 0.9,
             "num_inference_steps": 15,
             "guidance_scale": 7.5,
-            "negative_prompt": "people, multiple people, bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy",
+            "negative_prompt": "",
             "blur": 15
         },
         "final_parameters": {
@@ -24,7 +24,7 @@
             "width":1280,
             "height":1024,
             "guidance_scale": 12.0,
-            "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy"
+            "negative_prompt": "blurry, noisy, grainy, low detail, overexposed, bad anatomy"
         },
         "scheduler": {
             "type": "DPM"
