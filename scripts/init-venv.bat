@@ -1,73 +1,87 @@
 @echo off
-SETLOCAL EnableDelayedExpansion
+REM Enable delayed variable expansion (if needed)
+setlocal enabledelayedexpansion
 
-:: Set error handling
-SET "CPATH="
-SET "LIBRARY_PATH="
+REM ----------------------------------------------------------------------
+REM This script is intended for Windows.
+REM The original script checked for Darwin/macOS; here we assume Windows.
+set "DARWIN_FOUND=0"
 
-:: MacOS is not applicable, hence we skip this part for Windows
+REM ----------------------------------------------------------------------
+REM Set the project root directory (assumed to be the parent directory of this script)
+pushd "%~dp0\.."
+set "PROJECT_ROOT=%CD%"
+popd
 
-:: Set project root directory (assumed to be the script's location)
-SET "PROJECT_ROOT=%~dp0.."
+echo Using Python interpreter:
+where python3 2>nul || where python
 
-:: Use the environment variable PYTHON_BIN if set, otherwise default to specific path
-IF DEFINED PYTHON_BIN (
-    SET "PYTHON_BIN=%PYTHON_BIN%"
-) ELSE (
-    SET "PYTHON_BIN=python3.EXE"
+REM ----------------------------------------------------------------------
+REM Create the virtual environment in the project root
+set "VENV_PATH=%PROJECT_ROOT%\.venv"
+echo Creating virtual environment in %VENV_PATH% ...
+if exist "%VENV_PATH%" (
+    rmdir /s /q "%VENV_PATH%"
 )
 
-ECHO Using Python interpreter: %PYTHON_BIN%
-
-:: Create the virtual environment in the project root
-SET "VENV_PATH=%PROJECT_ROOT%\.venv"
-ECHO Creating virtual environment in %VENV_PATH% ...
-IF EXIST "%VENV_PATH%" (
-    rem RMDIR /S /Q "%VENV_PATH%"
-)
-%PYTHON_BIN% -m venv "%VENV_PATH%"
-IF ERRORLEVEL 1 (
-    ECHO Failed to create virtual environment.
-    EXIT /B 1
+python -m venv "%VENV_PATH%"
+if errorlevel 1 (
+    echo Failed to create virtual environment.
+    exit /b 1
 )
 
-:: Activate the virtual environment (not directly possible in batch; need to invoke activation script)
-CALL "%VENV_PATH%\Scripts\activate"
+REM ----------------------------------------------------------------------
+REM Activate the virtual environment
+echo Activating virtual environment ...
+call "%VENV_PATH%\Scripts\activate.bat"
 
-%VENV_PATH%\Scripts\python -m pip install --upgrade pip
+REM ----------------------------------------------------------------------
+REM Upgrade pip and install numpy with version constraint
+echo Upgrading pip ...
+python -m pip install --upgrade pip
 
-:: Check if a unified requirements.txt exists
-SET "REQUIREMENTS_FILE=%PROJECT_ROOT%\requirements.txt"
-IF NOT EXIST "%REQUIREMENTS_FILE%" (
-    ECHO Error: %REQUIREMENTS_FILE% not found.
-    CALL "%VENV_PATH%\Scripts\deactivate"
-    EXIT /B 1
+echo Installing numpy (version less than 2)...
+python -m pip install "numpy<2"
+
+REM ----------------------------------------------------------------------
+REM Check if a unified requirements.txt exists
+set "REQUIREMENTS_FILE=%PROJECT_ROOT%\requirements.txt"
+if not exist "%REQUIREMENTS_FILE%" (
+    echo Error: %REQUIREMENTS_FILE% not found.
+    exit /b 1
 )
 
-ECHO Installing dependencies from %REQUIREMENTS_FILE% ...
-%VENV_PATH%\Scripts\pip install -r "%REQUIREMENTS_FILE%"
-IF ERRORLEVEL 1 (
-    ECHO Failed to install dependencies.
-    CALL "%VENV_PATH%\Scripts\deactivate"
-    EXIT /B 1
+echo Installing dependencies from %REQUIREMENTS_FILE% ...
+python -m pip install -c constraints.txt -r "%REQUIREMENTS_FILE%"
+if errorlevel 1 (
+    echo Failed to install dependencies.
+    exit /b 1
 )
 
-:: OSTYPE-specific installations are limited in Windows batch, use conditional checks
-:: Since Windows does not support MacOS specifics, skip to general Windows/Linux commands
-ECHO ✅ Windows/Linux detected. Installing CUDA-enabled PyTorch...
-%VENV_PATH%\Scripts\pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
+REM ----------------------------------------------------------------------
+REM Install additional dependencies depending on OS.
+if "%DARWIN_FOUND%"=="1" (
+    python -m pip install -c constraints.txt -r gui-requirements.txt
+) else (
+    python -m pip install -c constraints.txt transformers "diffusers[torch]" tf-keras==2.17.0 accelerate
+    python -m pip install -c constraints.txt torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
+)
 
-ECHO ✅ PyTorch installation complete!
-:: Set PYTHONPATH to include both client and server
-SET "PYTHONPATH=%PROJECT_ROOT%\client;%PROJECT_ROOT%\server;%PROJECT_ROOT%\CodeFormer"
-ECHO Setting PYTHONPATH for both client/ and server/...
+echo PyTorch installation complete!
 
-:: Fix CodeFormer
-CALL "%VENV_PATH%\Scripts\activate"
-ECHO Installing CodeFormer dependencies ...
-CD "%PROJECT_ROOT%\CodeFormer"
-%PYTHON_BIN% ./basicsr/setup.py install
+REM ----------------------------------------------------------------------
+REM Set PYTHONPATH to include both client and server directories.
+echo Setting PYTHONPATH for client, server, and CodeFormer...
+set "PYTHONPATH=%PROJECT_ROOT%\client;%PROJECT_ROOT%\server;%PROJECT_ROOT%\CodeFormer"
 
-ECHO Virtual environment setup complete.
-ECHO To activate it manually, run: CALL "%VENV_PATH%\Scripts\activate"
-ENDLOCAL
+REM ----------------------------------------------------------------------
+REM Fix CodeFormer: Activate the venv (again) and install CodeFormer dependencies.
+call "%VENV_PATH%\Scripts\activate.bat"
+echo Installing CodeFormer dependencies ...
+cd "%PROJECT_ROOT%\CodeFormer"
+REM Uncomment the following line if CodeFormer installation is needed:
+python3 basicsr\setup.py install
+
+echo Virtual environment setup complete.
+echo To activate it manually, run: call "%VENV_PATH%\Scripts\activate.bat"
+pause
