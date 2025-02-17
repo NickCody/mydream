@@ -92,7 +92,7 @@ async def process_image(
 
         # STEP 6: Convert original image (with transparency) to PNG bytes
         buffer_orig = io.BytesIO()
-        original_image.save(buffer_orig, format="PNG")
+        input_image.save(buffer_orig, format="PNG")
         buffer_orig.seek(0)
         orig_bytes = buffer_orig.getvalue()
 
