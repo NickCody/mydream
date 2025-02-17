@@ -387,7 +387,9 @@ class ModelConfigLoader:
                 # Now, apply the checkpoint to the appropriate part of the model.
                 # For example, if your checkpoint contains weights for the UNet:
                 base_pipeline.unet.load_state_dict(checkpoint, strict=False)
-
+            else:
+                print("⚠️ No final model checkpoint file specified. Using base pipeline only.")
+                
             self.final_pipeline = base_pipeline
             
         except Exception as e:
