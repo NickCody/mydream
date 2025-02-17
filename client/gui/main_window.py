@@ -9,6 +9,7 @@ from gui.image_sender import ImageSender
 from audio.audio_worker import AudioWorker
 from utils import resize_and_crop
 import json, base64
+from audio.play_sounds import PlaySound
 
 # DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, portrait photography, photorealistic"""
 DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in roman tunic, ultra-realistic portrait, high quality, photograph, photorealistic, cinematic lighting, highly detailed, ultra-sharp"""
@@ -37,6 +38,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sender_thread = None
         self.audio_worker = None  # Only controls audio recording.
         self.request_in_progress = False  # Flag to avoid concurrent server requests.
+        self.sound_player = PlaySound("client/audio/sounds/camera-shutter.mp3")
         self.initUI()
         # Start the image sending loop immediately.
         # self.process_next_frame()
@@ -168,7 +170,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def start_capture(self):
         ### Change video_widget border to green
         self.video_widget.setStyleSheet("border: 2px solid green;")
-        
         QtCore.QTimer.singleShot(3000, self.do_capture)
         
     def do_capture(self):
@@ -179,6 +180,9 @@ class MainWindow(QtWidgets.QMainWindow):
           - On successful response, display the image for 5 seconds.
           - On server error, wait 2 seconds before retrying.
         """
+        
+        QtCore.QTimer.singleShot(10, lambda: self.sound_player.play_sound())
+        
         # set video widget border black
         self.video_widget.setStyleSheet("border: 2px solid black;")
         
