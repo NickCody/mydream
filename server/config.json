@@ -23,7 +23,7 @@
             "num_inference_steps": 120,
             "width":1280,
             "height":1024,
-            "guidance_scale": 18.0,
+            "guidance_scale": 7.5,
             "negative_prompt": "blurry, noisy, grainy, low detail, overexposed, bad anatomy, clay, painting, 3D-animation, anime, cartoon"
         },
         "scheduler": {
