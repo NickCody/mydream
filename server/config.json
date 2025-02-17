@@ -9,14 +9,13 @@
             "strength": 0.33,
             "num_inference_steps": 15,
             "guidance_scale": 10,
-            "negative_prompt": ""
+            "negative_prompt": "cartoon, anime"
         },
         "bg_parameters": {
             "strength": 0.9,
             "num_inference_steps": 15,
             "guidance_scale": 7.5,
-            "negative_prompt": "",
-            "blur": 15
+            "negative_prompt": "cartoon, anime"
         },
         "final_parameters": {
             "strength": 0.66,
