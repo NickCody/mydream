@@ -67,7 +67,7 @@
         "torch_dtype": "float16",
         "lora": {
             "model_path": "nickyballs-last-f16.safetensors",
-            "alpha": 0.5
+            "alpha": 0.9
         }
     },
     "sdxl-iniverse": {
