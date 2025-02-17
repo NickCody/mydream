@@ -77,7 +77,7 @@ fi
 echo "✅ PyTorch installation complete!"
 # Set PYTHONPATH to include both client and server
 echo "Setting PYTHONPATH for both client/ and server/..."
-export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server
+export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server"
 
 echo "Virtual environment setup complete."
 echo "To activate it manually, run: source $VENV_PATH/bin/activate"

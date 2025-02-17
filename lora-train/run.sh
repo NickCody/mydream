@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python /Users/nic/repos/sd-scripts/sdxl_train_network.py \
+python $SD_SCRIPTS_HOME/sdxl_train_network.py \
   --pretrained_model_name_or_path="stabilityai/stable-diffusion-xl-base-1.0" \
   --train_data_dir="train_data/" \
   --output_dir="lora/" \
