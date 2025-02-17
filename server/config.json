@@ -9,7 +9,7 @@
             "strength": 0.33,
             "num_inference_steps": 15,
             "guidance_scale": 10,
-            "negative_prompt": "cartoon, anime"
+            "negative_prompt": "cartoon, anime, eyeglasses, sunglasses, eyewear"
         },
         "bg_parameters": {
             "strength": 0.9,
