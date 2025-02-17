@@ -77,13 +77,7 @@ fi
 echo "✅ PyTorch installation complete!"
 # Set PYTHONPATH to include both client and server
 echo "Setting PYTHONPATH for both client/ and server/..."
-export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server:$PROJECT_ROOT/CodeFormer"
-
-# Fix CodeFormer
-source $VENV_PATH/bin/activate
-echo "Installing CodeFormer dependencies ..."
-cd CodeFormer
-#python3 ./basicsr/setup.py install
+export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server
 
 echo "Virtual environment setup complete."
 echo "To activate it manually, run: source $VENV_PATH/bin/activate"

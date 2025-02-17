@@ -21,21 +21,21 @@ Pillow
 # Networking & Utilities
 requests                    # For sending HTTP requests to the server
 
-# Codeformer requirements
-addict
-future
-lmdb
-opencv-python
-Pillow
-pyyaml
-requests
-scikit-image
-scipy
-tb-nightly
-tqdm
-yapf
-lpips
-gdown # supports dVwnloading the large file from Google Drive
+# # Codeformer requirements
+# addict
+# future
+# lmdb
+# opencv-python
+# Pillow
+# pyyaml
+# requests
+# scikit-image
+# scipy
+# tb-nightly
+# tqdm
+# yapf
+# lpips
+# gdown # supports dVwnloading the large file from Google Drive
 
 # Constrain numpy to a version below 2 for all platforms
 torch

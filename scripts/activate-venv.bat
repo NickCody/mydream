@@ -17,7 +17,7 @@ IF NOT EXIST "%VENV_PATH%" (
 echo Activating virtual environment...
 CALL "%VENV_PATH%\Scripts\activate"
 
-:: Set PYTHONPATH to include client, server, and CodeFormer directories
-SET "PYTHONPATH=%PROJECT_ROOT%\client;%PROJECT_ROOT%\server;%PROJECT_ROOT%\CodeFormer"
+:: Set PYTHONPATH to include client, server
+SET "PYTHONPATH=%PROJECT_ROOT%\client;%PROJECT_ROOT%\server
 echo PYTHONPATH set to: %PYTHONPATH%
 echo Virtual environment activated. 🚀
