@@ -40,6 +40,7 @@ from transformers import AutoTokenizer
 from huggingface_hub import hf_hub_download
 import os
 from app.codeformer_api import load_codeformer
+from safetensors.torch import load_file as safe_load
 
 # Use Hugging Face Diffusers pipelines
 pipeline_mapping = {
@@ -120,6 +121,8 @@ class ModelConfigLoader:
 
         self.model_name = self.config_entry["model_name"]
         self.final_model_name = self.config_entry["final_model_name"]
+        self.final_model_checkpoint_file = self.config_entry["final_model_checkpoint_file"]
+        
         self.pipeline_class = self.config_entry.get("pipeline_class", "StableDiffusionImg2ImgPipeline")
         self.final_pipeline_class = self.config_entry.get("final_pipeline_class", "StableDiffusionImg2ImgPipeline")
         self.pipeline = None
@@ -361,7 +364,7 @@ class ModelConfigLoader:
             }
 
             # 🔹 Load the pipeline
-            self.final_pipeline = PipelineClass.from_pretrained(
+            base_pipeline = PipelineClass.from_pretrained(
                 self.final_model_name,
                 cache_dir=HF_CACHE,
                 token=HF_TOKEN,
@@ -375,7 +378,18 @@ class ModelConfigLoader:
         
             # Apply LoRA (if configured)
             self.apply_lora_to_pipeline(self.config_entry.get("lora"), self.pipeline)
+           
+            if self.final_model_checkpoint_file is not None:
+                print(f"🔹 Loading final model checkpoint from {self.final_model_checkpoint_file}")
+                # Then, load the checkpoint from your safetensors file.
+                checkpoint = safe_load(self.final_model_checkpoint_file)
 
+                # Now, apply the checkpoint to the appropriate part of the model.
+                # For example, if your checkpoint contains weights for the UNet:
+                base_pipeline.unet.load_state_dict(checkpoint, strict=False)
+
+            self.final_pipeline = base_pipeline
+            
         except Exception as e:
             raise RuntimeError(f"❌ Failed to load model {self.config_name}: {e}")
 
