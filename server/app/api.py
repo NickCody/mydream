@@ -85,8 +85,13 @@ async def process_image(
         image_counter += 1
 
         # STEP 5: Convert final output image to PNG bytes
+        if codeformer_img is not None:
+            final_to_send = codeformer_img
+        else:
+            final_to_send = output_img
+            
         buffer_final = io.BytesIO()
-        output_img.save(buffer_final, format="PNG")
+        final_to_send.save(buffer_final, format="PNG")
         buffer_final.seek(0)
         final_bytes = buffer_final.getvalue()
 
