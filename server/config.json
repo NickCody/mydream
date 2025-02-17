@@ -31,7 +31,7 @@
         },
         "torch_dtype": "float16",
         "lora": {
-            "model_path": "/home/ubuntu/HuggingFace/sdxl1.0_realastic_female_lora.safetensors",
+            "model_path": "/home/ubuntu/HuggingFace/JuggerCineXL2.safetensors",
             "alpha": 0.5
         },
         "lora.1": {
