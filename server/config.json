@@ -16,7 +16,7 @@
             "num_inference_steps": 15,
             "guidance_scale": 7.5,
             "negative_prompt": "cartoon, anime",
-            "blur": 30
+            "blur": 31
         },
         "final_parameters": {
             "strength": 0.66,
