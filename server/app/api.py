@@ -69,17 +69,19 @@ async def process_image(
 
         # STEP 4: Process the image using AI inpainting
         # Note: transform_image returns several images. Here we assume output_img is the final image.
-        [output_img, codeformer_img, composite_img, foreground_img, background_img] = transform_image(
+        [output_img1, output_img2, output_img3, output_img4, codeformer_img, composite_img, foreground_img, background_img] = transform_image(
             input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask
         )
 
         # Optionally, save intermediate images for debugging
-        save_image("A-input_img", input_image)
-        save_image("B-foreground_img", foreground_img)
-        save_image("C-background_img", background_img)
+        save_image("A-input", input_image)
+        save_image("B-foreground", foreground_img)
+        save_image("C-background", background_img)
         save_image("D-composite", composite_img)
-        save_image("E-final", output_img)
-        save_image("F-codeformer", codeformer_img)
+        save_image("E1-final", output_img1)
+        save_image("E2-final", output_img2)
+        save_image("E3-final", output_img3)
+        save_image("E4-final", output_img4)
 
         global image_counter
         image_counter += 1
@@ -87,8 +89,9 @@ async def process_image(
         # STEP 5: Convert final output image to PNG bytes
         if codeformer_img is not None:
             final_to_send = codeformer_img
+            save_image("F-codeformer", codeformer_img)
         else:
-            final_to_send = output_img
+            final_to_send = output_img1
             
         buffer_final = io.BytesIO()
         final_to_send.save(buffer_final, format="PNG")

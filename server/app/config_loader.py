@@ -261,17 +261,6 @@ class ModelConfigLoader:
 
         self.current_seed = self.config_entry.get("seed", None)
 
-        # if self.current_seed is not None:
-        #     print(f"🎲 Using fixed seed: {current_seed}")
-        #     generator = torch.manual_seed(current_seed)  # Set manual seed
-        # else:
-        #     current_seed = torch.randint(0, 2**32 - 1, (1,)).item()  # Generate a random seed
-        #     print(f"🎲 Using random seed: {current_seed}")
-        #     generator = torch.manual_seed(current_seed)  # Set the generated seed
-
-        # # 🔹 Ensure generator is passed into pipeline calls
-        # self.generator = generator
-
         try:
             # 🔹 Select appropriate pipeline
             if self.pipeline_class == "StableDiffusion3ImageToImage":
@@ -330,17 +319,6 @@ class ModelConfigLoader:
         print(f"🔄 Using pipeline: {self.final_pipeline_class}")
 
         self.current_seed = self.config_entry.get("seed", None)
-
-        # if self.current_seed is not None:
-        #     print(f"🎲 Using fixed seed: {current_seed}")
-        #     generator = torch.manual_seed(current_seed)  # Set manual seed
-        # else:
-        #     current_seed = torch.randint(0, 2**32 - 1, (1,)).item()  # Generate a random seed
-        #     print(f"🎲 Using random seed: {current_seed}")
-        #     generator = torch.manual_seed(current_seed)  # Set the generated seed
-
-        # # 🔹 Ensure generator is passed into pipeline calls
-        # self.generator = generator
 
         # ✅ Load CodeFormer if enabled in config
         codeformer_config = self.config_entry.get("codeformer", {})

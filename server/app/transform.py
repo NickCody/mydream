@@ -5,6 +5,8 @@ import numpy as np
 from diffusers import DPMSolverMultistepScheduler
 from app.codeformer_api import enhance_faces
 import cv2
+import time
+import torch
 
 def round_to_multiple(value, multiple=64):
     return math.ceil(value / multiple) * multiple
@@ -144,9 +146,13 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
         tmp_bg = Image.new("RGB", composite_image.size, (255, 255, 255))
         # Composite the RGBA image onto the background; this removes transparency
         composite_image = Image.alpha_composite(tmp_bg.convert("RGBA"), composite_image).convert("RGB")
-    
+   
+    # Set seed for reproducibility# generate random integer between 0 and max int   
+    random_seed = int(time.time() * 1000) % np.iinfo(np.int32).max 
+    generator = torch.manual_seed(random_seed)
+     
     if FINAL_PIPELINE is not None: 
-        print(f"🎭 Final inpaint")
+        print(f"🎭 Final Image to Image")
         result = FINAL_PIPELINE(
             prompt=prompt + "," + bg_prompt,
             width=final_params.get("width", processed_width),
@@ -155,16 +161,24 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
             guidance_scale=final_params.get("guidance_scale", 7.5),
             num_inference_steps=final_params.get("num_inference_steps", 20),
             image=composite_image,
-            strength=final_params.get("strength", 0.5)
+            strength=final_params.get("strength", 0.5),
+            generator=generator
+            num_images_per_prompt=4
         )
-        final_image = result.images[0]
+        final_image1 = result.images[0]
+        final_image2 = result.images[1]
+        final_image3 = result.images[2]
+        final_image4 = result.images[3]
     else:
-        final_image = composite_image;
+        final_image1 = composite_image
+        final_image2 = composite_image
+        final_image3 = composite_image
+        final_image4 = composite_image
     
     codeformer_config = config_loader.config_entry.get("codeformer", {})
     codeformer_image = enhance_faces(
         config_loader.device,
-        final_image,
+        final_image1,
         enabled=codeformer_config.get("enabled", False),
         weight=codeformer_config.get("weight", 0.7),
         upscale=codeformer_config.get("upscale", 1),
@@ -179,4 +193,4 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     # np_image = np.array(final_image)
     # print(f"Image Stats - Min: {np_image.min()}, Max: {np_image.max()}, Mean: {np_image.mean()}")
 
-    return [final_image, codeformer_image, composite_image, foreground_image, background_image]
+    return [final_image1, final_image2, final_image3, final_image4, codeformer_image, composite_image, foreground_image, background_image]
