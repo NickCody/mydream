@@ -162,7 +162,7 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
             num_inference_steps=final_params.get("num_inference_steps", 20),
             image=composite_image,
             strength=final_params.get("strength", 0.5),
-            generator=generator
+            generator=generator,
             num_images_per_prompt=4
         )
         final_image1 = result.images[0]
