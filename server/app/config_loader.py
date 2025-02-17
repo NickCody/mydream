@@ -1,4 +1,5 @@
 import os
+from os import environ as env
 import sys
 import json
 import torch
@@ -121,7 +122,7 @@ class ModelConfigLoader:
 
         self.model_name = self.config_entry["model_name"]
         self.final_model_name = self.config_entry["final_model_name"]
-        self.final_model_checkpoint_file = self.config_entry["final_model_checkpoint_file"]
+        self.final_model_checkpoint_file = f"{env.get("SAFETENSOR_HOME")}/{self.config_entry["final_model_checkpoint_file"]}"
         
         self.pipeline_class = self.config_entry.get("pipeline_class", "StableDiffusionImg2ImgPipeline")
         self.final_pipeline_class = self.config_entry.get("final_pipeline_class", "StableDiffusionImg2ImgPipeline")
