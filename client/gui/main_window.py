@@ -39,7 +39,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.request_in_progress = False  # Flag to avoid concurrent server requests.
         self.initUI()
         # Start the image sending loop immediately.
-        self.process_next_frame()
+        # self.process_next_frame()
 
     def initUI(self):
         
@@ -56,7 +56,13 @@ class MainWindow(QtWidgets.QMainWindow):
         video_layout = QtWidgets.QHBoxLayout()
         video_layout.setAlignment(QtCore.Qt.AlignCenter)
         self.video_widget = VideoWidget(self)
+        self.video_widget.setStyleSheet("border: 2px solid black;")
         video_layout.addWidget(self.video_widget)
+        self.capture_button = QtWidgets.QPushButton("Capture", self)
+        self.capture_button.clicked.connect(lambda: self.start_capture())
+        self.capture_button.setFixedHeight(33)
+        video_layout.addWidget(self.capture_button)
+        
         main_layout.addLayout(video_layout)
         
         # 🔹 Create a container layout for the controls
@@ -159,7 +165,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.voice_text_box.setPlainText(text)
     
 
-    def process_next_frame(self):
+    def start_capture(self):
+        ### Change video_widget border to green
+        self.video_widget.setStyleSheet("border: 2px solid green;")
+        
+        QtCore.QTimer.singleShot(3000, self.do_capture)
+        
+    def do_capture(self):
         """
         Continually capture a frame from OpenCV and send it to the server.
           - If a request is in progress, check again shortly.
@@ -167,14 +179,17 @@ class MainWindow(QtWidgets.QMainWindow):
           - On successful response, display the image for 5 seconds.
           - On server error, wait 2 seconds before retrying.
         """
-        if self.request_in_progress:
-            QtCore.QTimer.singleShot(100, self.process_next_frame)
-            return
+        # set video widget border black
+        self.video_widget.setStyleSheet("border: 2px solid black;")
+        
+        # if self.request_in_progress:
+        #     QtCore.QTimer.singleShot(100, self.process_next_frame)
+        #     return
         
         frame = self.video_widget.get_current_frame()
         if frame is None:
-            print("Failed to capture frame.")
-            QtCore.QTimer.singleShot(100, self.process_next_frame)
+            # print("Failed to capture frame.")
+            # QtCore.QTimer.singleShot(100, self.process_next_frame)
             return
         
         # resize frame to 640x512 maintain aspect ratio and crop left/right
@@ -182,6 +197,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Setup prompts
         self.request_in_progress = True
+        self.capture_button.setEnabled(False)
         voice_prompt = f"({self.voice_text_box.toPlainText().strip()}:1.5)"  # May be blank if no transcription.
         if not voice_prompt:
             voice_prompt = ""  # Explicitly use an empty prompt if nothing is heard.
@@ -221,7 +237,8 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Error handling server response: {e}")
         finally:
             self.request_in_progress = False
-            QtCore.QTimer.singleShot(0, self.process_next_frame)
+            self.capture_button.setEnabled(True)
+            # QtCore.QTimer.singleShot(0, self.process_next_frame)
         
     def handle_server_error(self, error_msg):
         """
@@ -230,7 +247,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         print("Error sending image to server:", error_msg)
         self.request_in_progress = False
-        QtCore.QTimer.singleShot(2000, self.process_next_frame)
+        self.capture_button.setEnabled(True)
+        # QtCore.QTimer.singleShot(2000, self.process_next_frame)
     
     def closeEvent(self, event):
         print("Closing application...")
