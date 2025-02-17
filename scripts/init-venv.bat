@@ -71,16 +71,8 @@ echo PyTorch installation complete!
 
 REM ----------------------------------------------------------------------
 REM Set PYTHONPATH to include both client and server directories.
-echo Setting PYTHONPATH for client, server, and CodeFormer...
-set "PYTHONPATH=%PROJECT_ROOT%\client;%PROJECT_ROOT%\server;%PROJECT_ROOT%\CodeFormer"
-
-REM ----------------------------------------------------------------------
-REM Fix CodeFormer: Activate the venv (again) and install CodeFormer dependencies.
-call "%VENV_PATH%\Scripts\activate.bat"
-echo Installing CodeFormer dependencies ...
-cd "%PROJECT_ROOT%\CodeFormer"
-REM Uncomment the following line if CodeFormer installation is needed:
-python3 basicsr\setup.py install
+echo Setting PYTHONPATH for client, server
+set "PYTHONPATH=%PROJECT_ROOT%\client;%PROJECT_ROOT%\server
 
 echo Virtual environment setup complete.
 echo To activate it manually, run: call "%VENV_PATH%\Scripts\activate.bat"

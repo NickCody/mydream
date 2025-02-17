@@ -18,7 +18,7 @@ echo "Activating virtual environment..."
 source "$VENV_PATH/bin/activate"
 
 # Set PYTHONPATH to include client and server directories
-export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server:$PROJECT_ROOT/CodeFormer"
+export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server
 
 echo "PYTHONPATH set to: $PYTHONPATH"
 echo "Virtual environment activated. 🚀"

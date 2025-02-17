@@ -23,12 +23,6 @@ brew install cmake
 python3 -m pip install jax-metal
 ```
 
-### CodeFormer
-
-```bash
-git clone --branch 2025-02-08-nickcody git@github.com:NickCody/CodeFormer.git
-```
-
 On H200 GPU's, you need to run `nvidia-smi` and note the CUDA Version:
 
 ```text
@@ -101,6 +95,14 @@ Typical config looks like this:
         }
     }
 ```
+## Running
+
+On Windows/Mac/Linux, you need to set:
+
+```bash
+export HF_API_KEY=<your key>
+export SAFETENSOR_HOME=<safetensor directory>
+```
 
 ## NOTES
 
@@ -108,5 +110,4 @@ Typical config looks like this:
 - Default prompt is in `client/gui/main_window.py`, lame but will fix later
 
 keys in bashrc
-codeformer
 comment out pyqt and
