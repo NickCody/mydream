@@ -45,7 +45,13 @@ torchaudio
 peft
 jax
 
+##############################
+# sd-scripts requirements
 ###############################
+einops
+imagesize
+voluptuous
+
 # macOS Dependencies
 ###############################
 # Use the macOS-specific TensorFlow and PyTorch packages (Metal-enabled)

@@ -198,7 +198,7 @@ class ModelConfigLoader:
 
 
     @staticmethod
-    def apply_lora_to_pipeline(lora_config, pipeline):
+    def apply_lora_to_pipeline(lora_config, dtype, pipeline):
         """
         Applies a LoRA model to the given pipeline if the lora_config is provided.
 
@@ -221,32 +221,38 @@ class ModelConfigLoader:
                 print("⚠️ Warning: LoRA model path is missing in config.")
                 return
 
-            # Determine if LoRA is a local file or a Hugging Face repo id.
-            # Check if lora_path is an absolute path and exists locally.
-            if os.path.isabs(lora_path) and os.path.exists(lora_path):
-                lora_file = lora_path
-                print(f"📂 Loading local LoRA: {lora_file}")
+            # Resolve the LoRA file path using SAFETENSOR_HOME
+            safetensor_home = os.getenv("SAFETENSOR_HOME", "")
+            possible_local_path = os.path.join(safetensor_home, lora_path)
+
+            if os.path.isabs(possible_local_path) and os.path.exists(possible_local_path):
+                lora_file = possible_local_path
+                print(f"📂 Loading local LoRA from SAFETENSOR_HOME: {lora_file}")
             else:
                 print(f"📥 Downloading LoRA from Hugging Face: {lora_path}")
-                # Here, lora_path is assumed to be the repo id (e.g., "namespace/repo_name")
-                # and the file is the basename of lora_path.
                 lora_file = hf_hub_download(repo_id=lora_path, filename=os.path.basename(lora_path))
 
-            # Load LoRA weights into the pipeline's unet.
+            # Ensure the LoRA file exists before proceeding
+            if not os.path.exists(lora_file):
+                raise FileNotFoundError(f"❌ LoRA file not found: {lora_file}")
+
+            # Verify LoRA file format
             use_safetensors = lora_file.endswith(".safetensors")
-            # pipeline.unet.load_attn_procs(lora_file, use_safetensors=use_safetensors)
-            pipeline.unet.load_lora_adapter(lora_file, use_safetensors=lora_file.endswith(".safetensors"))
-            
-            # Apply alpha scaling if supported.
-            if hasattr(pipeline.unet, "set_lora_scale"):
-                pipeline.unet.set_lora_scale(alpha)
-                print(f"✅ LoRA alpha set to {alpha}")
 
-            # Ensure LoRA is active and merge its weights.
-            pipeline.set_attn_processor("lora")
-            pipeline.fuse_lora()
+            # Determine appropriate torch dtype
+            print(f"🔄 Loading LoRA with dtype={dtype}...")
+            if dtype == "float16":
+                torch_dtype = torch.float16
+            elif dtype == "float32":
+                torch_dtype = torch.float32
+            else:
+                raise ValueError(f"❌ Unsupported dtype: {dtype}. Use 'float16' or 'float32'.")
 
-            print("✅ LoRA successfully applied!")
+            pipeline.to(dtype=torch_dtype)
+
+            # Apply LoRA to pipeline
+            pipeline.load_lora_weights(lora_file, weight=alpha)
+            print(f"✅ LoRA successfully loaded from {lora_file} with dtype={dtype} and alpha={alpha}")
 
         except Exception as e:
             print(f"❌ Error applying LoRA: {e}")
@@ -297,9 +303,6 @@ class ModelConfigLoader:
                 # 🔹 Apply scheduler (if configured)
                 self.apply_scheduler_to_pipeline(self.config_entry.get("scheduler"), self.pipeline)
             
-                # Apply LoRA (if configured)
-                self.apply_lora_to_pipeline(self.config_entry.get("lora"), self.pipeline)
-
         except Exception as e:
             raise RuntimeError(f"❌ Failed to load model {self.config_name}: {e}")
 
@@ -360,9 +363,8 @@ class ModelConfigLoader:
                 print("⚠️ No final model checkpoint file specified. Using base pipeline only.")
             
             # Apply LoRA (if configured)
-            self.apply_lora_to_pipeline(self.config_entry.get("lora"), base_pipeline)
+            self.apply_lora_to_pipeline(self.config_entry.get("lora"), self.config_entry.get("torch_dtype"), base_pipeline)
            
-                
             self.final_pipeline = base_pipeline
             
         except Exception as e:

@@ -7,27 +7,32 @@
         "final_pipeline_class": "StableDiffusionXLImg2ImgPipeline",
         "parameters": {
             "strength": 0.33,
-            "num_inference_steps": 15,
+            "num_inference_steps": 20,
             "guidance_scale": 10,
             "negative_prompt": "cartoon, anime, eyeglasses, sunglasses, eyewear"
         },
         "bg_parameters": {
             "strength": 0.9,
-            "num_inference_steps": 15,
+            "num_inference_steps": 20,
             "guidance_scale": 7.5,
             "negative_prompt": "cartoon, anime",
             "blur": 31
         },
         "final_parameters": {
             "strength": 0.66,
-            "num_inference_steps": 30,
+            "num_inference_steps": 45,
             "guidance_scale": 15,
             "negative_prompt": "blurry, noisy, grainy, low detail, overexposed, bad anatomy, clay, painting, 3D-animation, anime, cartoon"
         },
         "scheduler": {
             "type": "DPM"
         },
-        "torch_dtype": "float16"
+        "torch_dtype": "float32",
+        "lora": {
+            "model_path.1": "nickyballs-epoch-000010-f32.safetensors",
+            "model_path": "nickyballs-last-f32.safetensors",
+            "alpha": 0.5
+        }
     },
     "sdxl-dreamshaper": {
         "model_name": "stabilityai/stable-diffusion-xl-base-1.0",
@@ -37,20 +42,20 @@
         "final_pipeline_class": "StableDiffusionXLImg2ImgPipeline",
         "parameters": {
             "strength": 0.33,
-            "num_inference_steps": 15,
+            "num_inference_steps": 30,
             "guidance_scale": 10,
             "negative_prompt": "cartoon, anime, eyeglasses, sunglasses, eyewear"
         },
         "bg_parameters": {
             "strength": 0.9,
-            "num_inference_steps": 15,
+            "num_inference_steps": 30,
             "guidance_scale": 7.5,
             "negative_prompt": "cartoon, anime",
             "blur": 31
         },
         "final_parameters": {
             "strength": 0.66,
-            "num_inference_steps": 35,
+            "num_inference_steps": 150,
             "width":1280,
             "height":1024,
             "guidance_scale": 15,
@@ -59,7 +64,11 @@
         "scheduler": {
             "type": "DPM"
         },
-        "torch_dtype": "float16"
+        "torch_dtype": "float16",
+        "lora": {
+            "model_path": "nickyballs-last-f16.safetensors",
+            "alpha": 0.5
+        }
     },
     "sdxl-iniverse": {
         "model_name": "stabilityai/stable-diffusion-xl-base-1.0",
