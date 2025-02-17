@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.defaultInterpreterPath": ".venv\\Scripts\\python.exe",
+		"github.copilot.advanced": {
+			"fileFilters": {
+				"*.md": false
+			}
+		},
+		"isort.interpreter": [".venv\\Scripts\\python.exe"]
+	}
+}
