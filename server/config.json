@@ -24,7 +24,7 @@
             "width":1280,
             "height":1024,
             "guidance_scale": 12.0,
-            "negative_prompt": "blurry, noisy, grainy, low detail, overexposed, bad anatomy"
+            "negative_prompt": "blurry, noisy, grainy, low detail, overexposed, bad anatomy, clay, painting, 3D-animation, anime, cartoon"
         },
         "scheduler": {
             "type": "DPM"
