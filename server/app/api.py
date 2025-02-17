@@ -69,7 +69,7 @@ async def process_image(
 
         # STEP 4: Process the image using AI inpainting
         # Note: transform_image returns several images. Here we assume output_img is the final image.
-        [output_img1, output_img2, output_img3, output_img4, codeformer_img, composite_img, foreground_img, background_img] = transform_image(
+        [output_img1, output_img2, output_img3, output_img4, composite_img, foreground_img, background_img] = transform_image(
             input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask
         )
 
@@ -86,15 +86,8 @@ async def process_image(
         global image_counter
         image_counter += 1
 
-        # STEP 5: Convert final output image to PNG bytes
-        if codeformer_img is not None:
-            final_to_send = codeformer_img
-            save_image("F-codeformer", codeformer_img)
-        else:
-            final_to_send = output_img1
-            
         buffer_final = io.BytesIO()
-        final_to_send.save(buffer_final, format="PNG")
+        output_img1.save(buffer_final, format="PNG")
         buffer_final.seek(0)
         final_bytes = buffer_final.getvalue()
 

@@ -40,7 +40,6 @@ from diffusers import DPMSolverMultistepScheduler,EulerAncestralDiscreteSchedule
 from transformers import AutoTokenizer
 from huggingface_hub import hf_hub_download
 import os
-from app.codeformer_api import load_codeformer
 from safetensors.torch import load_file as safe_load
 
 # Use Hugging Face Diffusers pipelines
@@ -321,12 +320,6 @@ class ModelConfigLoader:
 
         self.current_seed = self.config_entry.get("seed", None)
 
-        # ✅ Load CodeFormer if enabled in config
-        codeformer_config = self.config_entry.get("codeformer", {})
-        if codeformer_config.get("enabled", True):
-            print("🔹 Initializing CodeFormer for face enhancement...")
-            load_codeformer(self.device)
-            
         try:
                 
             PipelineClass = pipeline_mapping.get(self.final_pipeline_class)

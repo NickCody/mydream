@@ -3,38 +3,12 @@ from app.model import PIPELINE, FINAL_PIPELINE, config_loader
 import math
 import numpy as np
 from diffusers import DPMSolverMultistepScheduler
-from app.codeformer_api import enhance_faces
 import cv2
 import time
 import torch
 
 def round_to_multiple(value, multiple=64):
     return math.ceil(value / multiple) * multiple
-
-def apply_codeformer(codeformer_cfg, image):
-    print(f"codeformer_cfg: {codeformer_cfg}")
-    # Retrieve CodeFormer settings
-    codeformer_enabled = codeformer_cfg.get("enabled", False)
-    
-    # ✅ Apply CodeFormer enhancement if enabled
-    if codeformer_enabled:
-        codeformer_weight = codeformer_cfg.get("weight", 0.7)
-        codeformer_upscale = codeformer_cfg.get("upscale", 1)
-        codeformer_has_aligned = codeformer_cfg.get("has_aligned", False)
-        codeformer_paste_back = codeformer_cfg.get("paste_back", True)
-        print(f"\n✨ Applying CodeFormer face enhancement (weight={codeformer_weight})...")
-        return enhance_faces(
-            config_loader.device,
-            image,
-            enabled=codeformer_enabled,
-            weight=codeformer_weight,
-            upscale=codeformer_upscale,
-            has_aligned=codeformer_has_aligned,
-            paste_back=codeformer_paste_back
-        )
-    else:
-        print("\n🚫 CodeFormer enhancement skipped.")
-        return image
 
 def apply_gaussian_blur(image: Image.Image, ksize=15, sigma=0):
     """
@@ -66,7 +40,7 @@ def apply_gaussian_blur(image: Image.Image, ksize=15, sigma=0):
 def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, processed_width: int, processed_height: int, mask: Image.Image = None) -> Image.Image:
     """
     Transforms the input image based on the provided prompt.
-    Supports inpainting if a mask is provided and applies CodeFormer if enabled.
+    Supports inpainting if a mask is provided 
     
     - White areas in the mask are preserved.
     - Black areas in the mask are AI-generated.
@@ -100,7 +74,6 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     )
    
     foreground_image = result.images[0] 
-    # foreground_image = apply_codeformer(codeformer_config, foreground_image)
     print(f"Foreground image: {type(foreground_image)}: {foreground_image.size[0]}x{foreground_image.size[1]}")
     
     bg_params = config_loader.get_bg_parameters()
@@ -135,7 +108,7 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
     composite_image = Image.composite(foreground_image, background_image, mask)
  
     #
-    # Final Render (before Codeformer)
+    # Final Render
     #
     final_params = config_loader.get_final_parameters()
     
@@ -175,22 +148,4 @@ def transform_image(input_image: Image.Image, prompt: str, bg_prompt: str, proce
         final_image3 = composite_image
         final_image4 = composite_image
     
-    codeformer_config = config_loader.config_entry.get("codeformer", {})
-    codeformer_image = enhance_faces(
-        config_loader.device,
-        final_image1,
-        enabled=codeformer_config.get("enabled", False),
-        weight=codeformer_config.get("weight", 0.7),
-        upscale=codeformer_config.get("upscale", 1),
-        has_aligned=codeformer_config.get("has_aligned", False),
-        paste_back=codeformer_config.get("paste_back", True)
-    )
- 
-    # ✅ Print generated image details after CodeFormer processing
-    print("\n📸 Output Image Details (After CodeFormer Enhancement):")
-    
-    # print(f"Final Image Size: {final_image.size[0]}x{final_image.size[1]}")
-    # np_image = np.array(final_image)
-    # print(f"Image Stats - Min: {np_image.min()}, Max: {np_image.max()}, Mean: {np_image.mean()}")
-
-    return [final_image1, final_image2, final_image3, final_image4, codeformer_image, composite_image, foreground_image, background_image]
+    return [final_image1, final_image2, final_image3, final_image4, composite_image, foreground_image, background_image]
