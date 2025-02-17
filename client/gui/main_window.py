@@ -11,8 +11,8 @@ from utils import resize_and_crop
 import json, base64
 
 # DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, portrait photography, photorealistic"""
-DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in roman tunic, ultra-realistic portrait, high quality, photograph, photorealistic"""
-DEFAULT_BG_PROMPT = r"""greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp"""
+DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in roman tunic, ultra-realistic portrait, high quality, photograph, photorealistic, cinematic lighting, highly detailed, ultra-sharp"""
+DEFAULT_BG_PROMPT = r"""ancient rome, colliseum, roman statues, roman architecture, cinematic bokeh"""
 # DEFAULT_BG_PROMPT = r"""starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
 # --- Main Window (combines video feed, image sending, and audio transcription) ---
 class MainWindow(QtWidgets.QMainWindow):
