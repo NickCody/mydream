@@ -19,11 +19,11 @@
             "blur": 15
         },
         "final_parameters": {
-            "strength": 0.66,
+            "strength": 0.8,
             "num_inference_steps": 90,
             "width":1280,
             "height":1024,
-            "guidance_scale": 9.0,
+            "guidance_scale": 12.0,
             "negative_prompt": "bad anatomy, blurry, low contrast, noise deformed hands, distorted faces, grainy, low detail, overexposed, bad anatomy"
         },
         "scheduler": {
