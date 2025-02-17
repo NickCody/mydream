@@ -376,9 +376,6 @@ class ModelConfigLoader:
             # 🔹 Apply scheduler (if configured)
             self.apply_scheduler_to_pipeline(self.config_entry.get("scheduler"), self.pipeline)
         
-            # Apply LoRA (if configured)
-            self.apply_lora_to_pipeline(self.config_entry.get("lora"), self.pipeline)
-           
             if self.final_model_checkpoint_file is not None:
                 print(f"🔹 Loading final model checkpoint from {self.final_model_checkpoint_file}")
                 # Then, load the checkpoint from your safetensors file.
@@ -389,6 +386,10 @@ class ModelConfigLoader:
                 base_pipeline.unet.load_state_dict(checkpoint, strict=False)
             else:
                 print("⚠️ No final model checkpoint file specified. Using base pipeline only.")
+            
+            # Apply LoRA (if configured)
+            self.apply_lora_to_pipeline(self.config_entry.get("lora"), base_pipeline)
+           
                 
             self.final_pipeline = base_pipeline
             
