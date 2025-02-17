@@ -1,5 +1,4 @@
 import sys
-import cv2
 import argparse
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QSystemTrayIcon
@@ -9,11 +8,12 @@ from gui.image_display_widget import ImageDisplayWidget
 from gui.image_sender import ImageSender
 from audio.audio_worker import AudioWorker
 from utils import resize_and_crop
+import json, base64
 
-DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, portrait photography, photorealistic"""
-# DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in star trek uniform, ultra-realistic portrait, high quality, photograph, photorealistic"""
-# DEFAULT_BG_PROMPT = r"""greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp"""
-DEFAULT_BG_PROMPT = r"""starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
+# DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, portrait photography, photorealistic"""
+DEFAULT_PROMPT = r"""[pedro pascal|antonio banderas], dressed in roman tunic, ultra-realistic portrait, high quality, photograph, photorealistic"""
+DEFAULT_BG_PROMPT = r"""greek baths, roman statues, servants, highly detailed, ultra-realistic portrait, cinematic bokeh, ultra-sharp"""
+# DEFAULT_BG_PROMPT = r"""starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
 # --- Main Window (combines video feed, image sending, and audio transcription) ---
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -116,6 +116,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.processed_label = ImageDisplayWidget(self)
         self.processed_label.setFixedHeight(512)
         processed_layout.addWidget(self.processed_label)
+        self.original_label = ImageDisplayWidget(self)
+        self.original_label.setFixedHeight(512)
+        processed_layout.addWidget(self.original_label)
         main_layout.addLayout(processed_layout)
        
     def clear_text(self):
@@ -191,24 +194,35 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sender_thread.error_signal.connect(self.handle_server_error)
         self.sender_thread.start()
    
-    def handle_server_response(self, image_bytes):
-        
-        # Convert the received bytes to a QImage.
-        processed_image = QtGui.QImage.fromData(image_bytes)
-        if processed_image.isNull():
-            print("Warning: Processed image is null!")
+
+    def handle_server_response(self, response_bytes):
+        try:
+            # Parse JSON response
+            response_str = response_bytes.decode("utf-8")
+            data = json.loads(response_str)
+            
+            # Decode base64 for original image
+            orig_data = base64.b64decode(data["original"])
+            original_image = QtGui.QImage.fromData(orig_data)
+            
+            # Decode base64 for final image
+            final_data = base64.b64decode(data["final"])
+            final_image = QtGui.QImage.fromData(final_data)
+            
+            if original_image.isNull() or final_image.isNull():
+                print("Warning: One of the images is null!")
+            else:
+                print(f"Server responded with original image size {original_image.size()} and final image size {final_image.size()}")
+                # Update your UI: for example, set these images in different widgets.
+                self.original_label.set_image(original_image)
+                self.processed_label.set_image(final_image)
+                
+        except Exception as e:
+            print(f"Error handling server response: {e}")
+        finally:
             self.request_in_progress = False
-            QtCore.QTimer.singleShot(2000, self.process_next_frame)
-            return
+            QtCore.QTimer.singleShot(0, self.process_next_frame)
         
-        print(f"Server responded with image of size {processed_image.size()}")
-
-        self.processed_label.set_image(processed_image)
-
-        self.request_in_progress = False
-       
-        QtCore.QTimer.singleShot(0, self.process_next_frame) 
-    
     def handle_server_error(self, error_msg):
         """
         If a server error occurs, log the error, clear the processed image,

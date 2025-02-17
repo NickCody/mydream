@@ -1,11 +1,11 @@
-import io
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import Response
-from PIL import Image
-import traceback
-import numpy as np
 from app.transform import transform_image  # Your img2img/inpainting pipeline
 from datetime import datetime
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.responses import Response
+from PIL import Image
+import base64
+import io
 import os
 
 app = FastAPI()
@@ -32,6 +32,7 @@ def save_image(moniker, image):
     image.save(filename, format="PNG")
     print(f"Saved processed image as {filename}")
     
+
 @app.post("/api/process")
 async def process_image(
     image: UploadFile = File(...),  # Expect an image file upload
@@ -41,71 +42,65 @@ async def process_image(
     processed_height: int = Form(...)
 ):
     """
-    Endpoint to process an input image with a given prompt.
-    
-    Expects:
-      - image: The input image file (supports PNG with transparency).
-      - prompt: A text prompt describing the person's transformation.
-      - bg_prompt: A text prompt describing the background transformation.
-    
-    Returns:
-      - A PNG image where the AI has inpainted the missing background.
+    Process an input image and return two images:
+      - The original RGBA image (with transparency)
+      - The final inpainted output image
     """
-    
     try:
         # STEP 1: Read the uploaded image bytes
         image_bytes = await image.read()
 
-        # STEP 2: Open the image with PIL
-        input_image = Image.open(io.BytesIO(image_bytes))
-        print(f"🔹 input_image  (orig): {type(input_image)}, size: {input_image.size}")
+        # STEP 2: Open the original image with PIL (keeping its original mode)
+        original_image = Image.open(io.BytesIO(image_bytes))
+        print(f"🔹 original_image: {original_image.mode}, size: {original_image.size}")
 
-        # STEP 3: Handle transparency (Extract Alpha Channel)
-        if input_image.mode == "RGBA":
+        # STEP 3: Handle transparency for inpainting (create mask)
+        if original_image.mode == "RGBA":
             print("Detected transparent image, extracting alpha mask.")
-            
-            # Extract RGB and Alpha (transparency) mask
-            alpha = input_image.getchannel("A")  
-            
-            # Create a binary mask (white = keep, black = generate)
-            mask = Image.new("L", input_image.size, 0)
-            mask.paste(alpha, (0, 0))  # Apply alpha as the inpainting mask
-            print(f"🔹 Mask type (orig): {type(mask)}, size: {mask.size}")
-            
-            # Remove transparency from original image (so model sees only the subject)
-            input_image = input_image.convert("RGB")
-
+            # Extract the alpha channel for mask
+            alpha = original_image.getchannel("A")
+            mask = Image.new("L", original_image.size, 0)
+            mask.paste(alpha, (0, 0))
+            # Remove transparency for processing
+            input_image = original_image.convert("RGB")
         else:
             print("Error: Non-transparent image detected, skipping!")
-            return
-        
+            return JSONResponse(status_code=400, content={"error": "Non-transparent image provided."})
+
         # STEP 4: Process the image using AI inpainting
+        # Note: transform_image returns several images. Here we assume output_img is the final image.
         [output_img, codeformer_img, composite_img, foreground_img, background_img] = transform_image(
             input_image, prompt, bg_prompt, processed_width, processed_height, mask=mask
         )
 
-        # Save the images with different monikers but the same index:
-        save_image("A-foreground_img", foreground_img)
-        save_image("B-background_img", background_img)
-        save_image("C-composite", composite_img)
-        save_image("D-final", output_img)
-        save_image("E-codeformer", codeformer_img)
+        # Optionally, save intermediate images for debugging
+        save_image("A-input_img", input_image)
+        save_image("B-foreground_img", foreground_img)
+        save_image("C-background_img", background_img)
+        save_image("D-composite", composite_img)
+        save_image("E-final", output_img)
+        save_image("F-codeformer", codeformer_img)
 
-        # STEP 5: Save the output image to disk for debugging
         global image_counter
         image_counter += 1
-        
-        # STEP 6: Save the output image as PNG (to preserve transparency)
-        buffer = io.BytesIO()
-        output_img.save(buffer, format="PNG")
-        buffer.seek(0)
 
-        
-        # STEP 7: Return the processed image
-        return Response(content=buffer.getvalue(), media_type="image/png")
+        # STEP 5: Convert final output image to PNG bytes
+        buffer_final = io.BytesIO()
+        output_img.save(buffer_final, format="PNG")
+        buffer_final.seek(0)
+        final_bytes = buffer_final.getvalue()
+
+        # STEP 6: Convert original image (with transparency) to PNG bytes
+        buffer_orig = io.BytesIO()
+        original_image.save(buffer_orig, format="PNG")
+        buffer_orig.seek(0)
+        orig_bytes = buffer_orig.getvalue()
+
+        # STEP 7: Return both images in a JSON response (base64-encoded)
+        return JSONResponse(content={
+            "original": base64.b64encode(orig_bytes).decode('utf-8'),
+            "final": base64.b64encode(final_bytes).decode('utf-8')
+        })
 
     except Exception as e:
-        # Handle errors and return a failure response
-        error_details = traceback.format_exc()
-        print("Error processing image:", error_details)
-        raise HTTPException(status_code=500, detail=str(e))
+        return JSONResponse(status_code=500, content={"error": str(e)})
