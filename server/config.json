@@ -131,7 +131,7 @@
         "model_name": "stabilityai/stable-diffusion-xl-refiner-1.0",
         "pipeline_class": "StableDiffusionXLImg2ImgPipeline",
         "final_model_name": "stabilityai/stable-diffusion-xl-base-1.0",
-        "final_model_checkpoint_file": "/home/ubuntu/HuggingFace/juggernautXL_juggXIByRundiffusion.safetensors",
+        "final_model_checkpoint_file": "/home/ubuntu/HuggingFace/juggernautXL.safetensors",
         "final_pipeline_class": "StableDiffusionXLImg2ImgPipeline",
         "parameters": {
             "strength": 0.33,
