@@ -1,5 +1,11 @@
 #!/bin/bash
 
+set -euo pipefail
+IFS=$'\n\t'
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source $PROJECT_ROOT/.venv/bin/activate
+
 python $SD_SCRIPTS_HOME/sdxl_train_network.py \
   --pretrained_model_name_or_path="stabilityai/stable-diffusion-xl-base-1.0" \
   --train_data_dir="train_data/" \

@@ -5,8 +5,6 @@
 		}
 	],
 	"settings": {
-		"workbench.experimental.settingsProfiles.enabled": true,
-		"workbench.settingsProfiles.workspace": "AI",
 		"github.copilot.advanced": {
 			"fileFilters": {
 				"*.md": false
@@ -15,15 +13,6 @@
 		"terminal.integrated.env.osx": {
 			"VIRTUAL_ENV": "${workspaceFolder}/.venv",
 			"PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
-		},
-		"terminal.integrated.profiles.osx": {
-			"bash": {
-				"path": "/bin/bash",
-				"removeme-args": [
-					"--rcfile",
-					"setup-env.sh"
-				]
-			}
 		}
 	}
 }

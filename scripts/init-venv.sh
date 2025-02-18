@@ -3,12 +3,13 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+echo "NOTE: Using Python interpreter: $(which python3)"
+
 if [[ "$OSTYPE" =~ [dD]arwin(64)? ]]; then
     DARWIN_FOUND=1
 else
     DARWIN_FOUND=0
 fi
-
 
 if [[ $DARWIN_FOUND -eq 1 ]]; then
   export CPATH="$(brew --prefix portaudio)/include"
@@ -19,23 +20,16 @@ fi
 # Set project root directory (assumed to be the script's location)
 #
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-echo "Using Python interpreter: $(which python3)"
-
-# Create the virtual environment in the project root
-VENV_PATH="$PROJECT_ROOT/.venv"
 
 #
 # Create Virtual Environment
 #
 echo "Creating virtual environment in $VENV_PATH ..."
+VENV_PATH="$PROJECT_ROOT/.venv"
 if [ -d "$VENV_PATH" ]; then
   rm -rf "$VENV_PATH"
 fi
 python3 -m venv "$VENV_PATH"
-if [ $? -ne 0 ]; then
-  echo "Failed to create virtual environment."
-  exit 1
-fi
 
 #
 # Activate the virtual environment
@@ -43,41 +37,25 @@ fi
 echo "Activating virtual environment ..."
 source "$VENV_PATH/bin/activate"
 
-#
-# Requirements
-#
 pip3 install --upgrade pip
 
-pip install "numpy<2"
-
-# Check if a unified requirements.txt exists
-REQUIREMENTS_FILE="$PROJECT_ROOT/requirements.txt"
-if [ ! -f "$REQUIREMENTS_FILE" ]; then
-  echo "Error: $REQUIREMENTS_FILE not found."
-  deactivate
-  exit 1
+#
+# Linux/Cuda
+#
+if [[ $DARWIN_FOUND -eq 0 ]]; then
+  $PROJECT_ROOT/scripts/install-torch-cuda.sh 
 fi
 
-echo "Installing dependencies from $REQUIREMENTS_FILE ..."
-pip3 install  -c constraints.txt -r "$REQUIREMENTS_FILE"
-if [ $? -ne 0 ]; then
-  echo "Failed to install dependencies."
-  deactivate
-  exit 1
-fi
+#
+# requirements.txt
+#
+pip3 install  -c constraints.txt -r "$PROJECT_ROOT/requirements.txt"
 
+#
+# GUI requirements
+#
 if [[ $DARWIN_FOUND -eq 1 ]]; then
     pip install -c constraints.txt -r gui-requirements.txt
-else
-	pip install -c constraints.txt transformers diffusers["torch"] tf-keras==2.17.0 accelerate
-	pip install -c constraints.txt torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
 fi
 
-
-echo "✅ PyTorch installation complete!"
-# Set PYTHONPATH to include both client and server
-echo "Setting PYTHONPATH for both client/ and server/..."
-export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server"
-
-echo "Virtual environment setup complete."
-echo "To activate it manually, run: source $VENV_PATH/bin/activate"
+echo "Success! Activate the venv and PYTHONPATH via: `source scripts/activate-venv.sh`"

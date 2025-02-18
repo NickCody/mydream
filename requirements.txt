@@ -1,3 +1,6 @@
+#
+# Any time you install packages ad-hoc, make sure you `pip install -c constraints.txt` to ensure compatibility of numpy
+#
 numpy<2
 
 # Server Requirements
@@ -13,6 +16,8 @@ python-multipart
 sentencepiece
 transformers
 uvicorn
+peft
+jax
 
 # Image and video processing
 opencv-python               # For video capture and image processing
@@ -21,29 +26,15 @@ Pillow
 # Networking & Utilities
 requests                    # For sending HTTP requests to the server
 
-# # Codeformer requirements
-# addict
-# future
-# lmdb
-# opencv-python
-# Pillow
-# pyyaml
-# requests
-# scikit-image
-# scipy
-# tb-nightly
-# tqdm
-# yapf
-# lpips
-# gdown # supports dVwnloading the large file from Google Drive
+# Constrain numpy to a version below 2 for all platforms, for windows and macOS
+# For CUDA environments, run scripts/install-torch-cuda.sh and mind the whl/cu124 version from the README
+torch; platform_system == "Darwin" or platform_system == "Windows"
+torchvision; platform_system == "Darwin" or platform_system == "Windows"
+torchaudio; platform_system == "Darwin" or platform_system == "Windows"
 
-# Constrain numpy to a version below 2 for all platforms
-torch
-torchvision
-torchaudio
-
-peft
-jax
+# Use the macOS-specific TensorFlow and PyTorch packages (Metal-enabled)
+tensorflow-macos; platform_system == "Darwin"
+tensorflow-metal; platform_system == "Darwin"
 
 ##############################
 # sd-scripts requirements
@@ -52,8 +43,3 @@ einops
 imagesize
 voluptuous
 
-# macOS Dependencies
-###############################
-# Use the macOS-specific TensorFlow and PyTorch packages (Metal-enabled)
-tensorflow-macos; platform_system == "Darwin"
-tensorflow-metal; platform_system == "Darwin"

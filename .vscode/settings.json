@@ -1,5 +1,6 @@
 {
     "editor.fontSize": 14,
+    "editor.lineHeight": 1.6,
     "editor.fontFamily": "'Iosevka SS18', Menlo, Monaco, 'Courier New', monospace",
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
     "python.terminal.activateEnvironment": true,

@@ -14,10 +14,7 @@ if [ ! -d "$VENV_PATH" ]; then
 fi
 
 # Activate the virtual environment
-echo "Activating virtual environment..."
-source "$VENV_PATH/bin/activate"
-
-# Set PYTHONPATH to include client and server directories
+source "$VENV_PATH/bin/activate" and setting PYTHONPATH
 export PYTHONPATH="$PROJECT_ROOT/client:$PROJECT_ROOT/server"
 
 echo "PYTHONPATH set to: $PYTHONPATH"

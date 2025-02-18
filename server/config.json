@@ -29,8 +29,7 @@
         },
         "torch_dtype": "float32",
         "lora": {
-            "model_path.1": "nickyballs-epoch-000010-f32.safetensors",
-            "model_path": "nickyballs-last-f32.safetensors",
+            "model_path.1": "mac/epoch-000006.safetensors",
             "alpha": 0.5
         }
     },

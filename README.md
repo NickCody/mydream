@@ -1,18 +1,14 @@
-# Dream Box
+# Dreambox
 
 NOTE: This README is a work in progress.
 
-## Install from Github
-
-```bash
-bash <(curl -sSL https://raw.githubusercontent.com/NickCody/mydream/main/install-mydream.sh)
-```
-
 ## INSTALL PREREQUISITES
 
-Most of these instructions are for the MacOS on Apple Silicon. Windows instructions will be added later.
+Rumple Dreambox runs on MacOS, Windows, and Linux.
 
-Some preliminary installations, you'll need Homebrew, python3, and portaudio.
+NOTE: On Linux, run the custom torch install below before running the `scripts/init-venv.sh` script.
+
+### MACOS
 
 ```bash
 brew install pyenv
@@ -22,6 +18,8 @@ brew install portaudio
 brew install cmake
 python3 -m pip install jax-metal
 ```
+
+### Linux
 
 On H200 GPU's, you need to run `nvidia-smi` and note the CUDA Version:
 
@@ -39,11 +37,11 @@ On H200 GPU's, you need to run `nvidia-smi` and note the CUDA Version:
 +-----------------------------------------+------------------------+----------------------+
 ```
 
-And run the appropriate torch install:
+And run the appropriate torch install, or modify `scripts/install-torch-cuda`. The cu124 below matches nvidia-smi CUDA version 12.4:
 
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --upgrade --force-reinstall
-```
+### Windows
+
+`win-scripts` has setup scripts.
 
 ### SPEECH RECOGNITION SETUP
 
@@ -95,6 +93,7 @@ Typical config looks like this:
         }
     }
 ```
+
 ## Running
 
 On Windows/Mac/Linux, you need to set:
