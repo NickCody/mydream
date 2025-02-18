@@ -1,7 +1,8 @@
 import sys
+import os
 import argparse
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QSystemTrayIcon
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 from PyQt5.QtGui import QIcon
 from video.video_widget import VideoWidget
 from gui.image_display_widget import ImageDisplayWidget
@@ -11,9 +12,12 @@ from utils import resize_and_crop
 import json, base64
 from audio.play_sounds import PlaySound
 
+DEFAULT_PROMPT = r"""handsome (pedro pascal) dressed in white t-shirt, handsome, sexy, muscular, (long wavy hair:1.2), black leather jacket, steaming coffee mug, photograph, photorealistic, cinematic"""
+DEFAULT_BG_PROMPT = r"""cafe, coffee shop, daytime, golden hour, cinematic lighting, dramatic, cinematic (bokeh:1.2)"""
+
 # DEFAULT_PROMPT = r"""Young (pretty) (beautiful) [alexandra daddario|mary elizabeth winstead], dressed in star trek uniform, portrait photography, photorealistic"""
-DEFAULT_PROMPT = r"""nickyballs dressed in roman tunic, ultra-realistic portrait, high quality, photograph, photorealistic, cinematic lighting, highly detailed, ultra-sharp"""
-DEFAULT_BG_PROMPT = r"""ancient rome, colliseum, roman statues, roman architecture, cinematic bokeh"""
+# DEFAULT_PROMPT = r"""nickyballs dressed in roman tunic, ultra-realistic portrait, high quality, photograph, photorealistic, cinematic lighting, highly detailed, ultra-sharp"""
+# DEFAULT_BG_PROMPT = r"""ancient rome, colliseum, roman statues, roman architecture, cinematic bokeh"""
 # DEFAULT_BG_PROMPT = r"""starship bridge, lighted panels, buttons, futuristic displays, bokeh blur, cinematic lighting, highly detailed"""
 # --- Main Window (combines video feed, image sending, and audio transcription) ---
 class MainWindow(QtWidgets.QMainWindow):
@@ -28,8 +32,9 @@ class MainWindow(QtWidgets.QMainWindow):
         On server error, the system waits 2 seconds before retrying.
       - Audio transcription updates the prompt textbox as the user speaks.
     """
-    def __init__(self, args):
+    def __init__(self, args, app):
         super(MainWindow, self).__init__()
+        self.app = app
         self.setWindowTitle("Rumple My Dream")
         self.server_url = args.server_url  # Store the server URL in an instance variable
         self.processed_height = args.height
@@ -44,11 +49,19 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.process_next_frame()
 
     def initUI(self):
-        
+       
+        menu = QMenu()
+        exit_action = QAction("Exit", self)
+        exit_action.triggered.connect(self.app.quit)
+        menu.addAction(exit_action)
+
         # Create System Tray Icon
         self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(QIcon("client/reasources/mydream.png"))  # Change to your icon file
+        icon_path = os.path.abspath("client/resources/mydream-512.png")
+        self.tray_icon.setIcon(QIcon(icon_path))  # Change to your icon file
         self.tray_icon.setVisible(True)
+        self.tray_icon.setContextMenu(menu)
+        self.tray_icon.show() 
         
         central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(central_widget)
@@ -170,25 +183,18 @@ class MainWindow(QtWidgets.QMainWindow):
     def start_capture(self):
         ### Change video_widget border to green
         self.video_widget.setStyleSheet("border: 2px solid green;")
+        self.video_widget.set_remove_background(True)
         QtCore.QTimer.singleShot(3000, self.do_capture)
         
     def do_capture(self):
         """
-        Continually capture a frame from OpenCV and send it to the server.
-          - If a request is in progress, check again shortly.
-          - If no frame is captured, retry after 2 seconds.
-          - On successful response, display the image for 5 seconds.
-          - On server error, wait 2 seconds before retrying.
+        Capture a frame from OpenCV and send it to the server.
         """
         
         QtCore.QTimer.singleShot(10, lambda: self.sound_player.play_sound())
         
         # set video widget border black
         self.video_widget.setStyleSheet("border: 2px solid black;")
-        
-        # if self.request_in_progress:
-        #     QtCore.QTimer.singleShot(100, self.process_next_frame)
-        #     return
         
         frame = self.video_widget.get_current_frame()
         if frame is None:
@@ -202,9 +208,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # Setup prompts
         self.request_in_progress = True
         self.capture_button.setEnabled(False)
-        voice_prompt = f"({self.voice_text_box.toPlainText().strip()}:1.5)"  # May be blank if no transcription.
+        voice_prompt = f"{self.voice_text_box.toPlainText().strip()}"  # May be blank if no transcription.
         if not voice_prompt:
             voice_prompt = ""  # Explicitly use an empty prompt if nothing is heard.
+        else:
+            voice_prompt = f"({voice_prompt}:1.25)"
             
         prompt = f"{voice_prompt}, {self.static_text_box.toPlainText().strip()}"
         bg_prompt = DEFAULT_BG_PROMPT
@@ -213,6 +221,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sender_thread.finished_signal.connect(self.handle_server_response)
         self.sender_thread.error_signal.connect(self.handle_server_error)
         self.sender_thread.start()
+        
+        self.video_widget.set_remove_background(False)
+        
    
 
     def handle_server_response(self, response_bytes):
@@ -241,6 +252,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Error handling server response: {e}")
         finally:
             self.request_in_progress = False
+            self.video_widget.set_remove_background(False)
             self.capture_button.setEnabled(True)
             # QtCore.QTimer.singleShot(0, self.process_next_frame)
         
@@ -251,8 +263,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         print("Error sending image to server:", error_msg)
         self.request_in_progress = False
+        self.video_widget.set_remove_background(False)
         self.capture_button.setEnabled(True)
-        # QtCore.QTimer.singleShot(2000, self.process_next_frame)
     
     def closeEvent(self, event):
         print("Closing application...")

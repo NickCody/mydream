@@ -40,7 +40,8 @@ def main():
     args = parse_args()  # Parse command-line arguments
 
     app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow(args)
+    app.setQuitOnLastWindowClosed(True)  # macOS may remove the tray if the last window is closed
+    window = MainWindow(args, app)
     window.show()
     sys.exit(app.exec_())
 

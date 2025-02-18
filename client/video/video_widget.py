@@ -17,12 +17,15 @@ class VideoWidget(QtWidgets.QLabel):
         self.last_frame = None  # Store the last captured frame
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(15)
+        self.timer.start(33)
         # Initialize background remover (Change to desired method)
         # self.bg_remover = bg_removal.MaskRCNNSegmentation(threshold=0.8)
         self.bg_remover = bg_removal.DeepLabV3Segmentation()
+        self.remove_background = False
+   
+    def set_remove_background(self, remove: bool):
+        self.remove_background = remove 
         
-    
     @staticmethod    
     def blend_background(frame, color=(255, 0, 0), alpha=0.5):
         """
@@ -64,16 +67,16 @@ class VideoWidget(QtWidgets.QLabel):
 
             return final_background
         else:
-            print("Warning: Expected an RGBA image but got an RGB image instead.")
             return frame  # Return unchanged if no alpha channel is found
         
     def update_frame(self):
         ret, frame = self.cap.read()
         if ret:
-            # Apply background removal before converting to RGB
-            frame = self.bg_remover.process(frame)
+            if self.remove_background:
+                # Apply background removal before converting to RGB
+                frame = self.bg_remover.process(frame)
+                
             hinted_frame = self.blend_background(frame, color=(0, 0, 0), alpha=0.8)
-            # hinted_frame = frame
              
             # Convert processed frame to RGB for Qt display
             frame_rgb = cv2.cvtColor(hinted_frame, cv2.COLOR_BGR2RGB)
