@@ -11,6 +11,7 @@ __pycache__/
 *.safetensors
 models/
 weights/
+lora-train/lora
 lora-train/train_data
 lora-train/inactive_train_data
 lambda.localrc
