@@ -1,0 +1,4 @@
+export HF_HOME=/home/ubuntu/HuggingFace/huggingface
+export HF_API_KEY=$HF_API_KEY
+export SAFETENSOR_HOME=/home/ubuntu/HuggingFace
+export SD_SCRIPTS_HOME=$HOME/sd-scripts
