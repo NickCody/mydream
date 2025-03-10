@@ -24,7 +24,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 #
 # Create Virtual Environment
 #
-echo "Creating virtual environment in $VENV_PATH ..."
+echo "Creating virtual environment in ..."
 VENV_PATH="$PROJECT_ROOT/.venv"
 if [ -d "$VENV_PATH" ]; then
   rm -rf "$VENV_PATH"
