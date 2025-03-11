@@ -6,7 +6,6 @@ IFS=$'\n\t'
 # Usage message
 usage() {
     echo "Usage: $0 -t \"tags\" <filespec>"
-    echo "./create-tags.sh  -t "rumplejeremy man human" "train_data/1_rumplejeremy/*.jpg"
     exit 1
 }
 
