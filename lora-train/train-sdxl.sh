@@ -18,7 +18,7 @@ python $SD_SCRIPTS_HOME/sdxl_train_network.py \
   --resolution=768 \
   --train_batch_size=1 \
   --learning_rate=1e-4 \
-  --max_train_steps=1200 \
+  --max_train_steps=2400 \
   --dataset_repeats=1 \
   --save_every_n_epochs=1 \
   \
